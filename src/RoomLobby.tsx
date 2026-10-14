@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { RoomPublicView, RoomRules } from "./shared/room";
 import type { PlayerGameView } from "./game/engine";
 
-type Snapshot={room:RoomPublicView;game?:PlayerGameView;membership?:{playerId:string;reconnectToken:string}};
+type Snapshot={room:RoomPublicView;viewerId:string;game?:PlayerGameView;membership?:{playerId:string;reconnectToken:string}};
 const ROOM_CODE=/^[A-HJ-NP-Z2-9]{6}$/;
 const SESSION_PREFIX="mahjong-friends:room:";
 function currentCode():string|null {
@@ -116,8 +116,7 @@ export default function RoomLobby({onPathChanged}:{onPathChanged?:(inRoom:boolea
     setNotice("邀请链接已复制，可以发给朋友");
   });
   const room=snapshot?.room;
-  const self=room?.players.find(p=>p.id===snapshot?.membership?.playerId) ??
-    room?.players.find(p=>!!code && savedToken(code) && p.id===getStoredId(code));
+  const self=room?.players.find(p=>p.id===snapshot?.viewerId);
   const isOwner=!!room&&self?.id===room.ownerId;
   return (
     <section className="room-lobby" aria-label="私人房间">
@@ -199,9 +198,4 @@ export default function RoomLobby({onPathChanged}:{onPathChanged?:(inRoom:boolea
       {notice&&<p role="status" className="room-success">{notice}</p>}
     </section>
   );
-}
-function getStoredId(_code:string):string|undefined {
-  // The server returns the full session identity on create/join; after reload,
-  // it will be resolved by the authenticated room response (see #5).
-  return undefined;
 }
