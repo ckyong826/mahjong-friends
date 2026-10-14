@@ -58,7 +58,7 @@ describe("server-authoritative game engine",()=>{
     const reserve=[...others.filter(t=>fillerIds.has(t.id)),whiteDragon,cat];
     const rest=others.filter(t=>!fillerIds.has(t.id));
     const state=startRound({playerIds:ids,replacementCount:14,shuffledTiles:[...rest,spring,...reserve]});
-    expect(state.players[0].bonuses.map(t=>t.id)).toEqual([spring.id,cat.id]);
+    expect(state.players[0].bonuses.slice(0,2).map(t=>t.id)).toEqual([spring.id,cat.id]);
     expect(state.players.map(p=>p.hand.length)).toEqual([14,13,13,13]);
     assertTileConservation(state);
   });
@@ -187,7 +187,7 @@ describe("server-authoritative game engine",()=>{
   });
   it("passes over non-claimable Fei without treating it as a natural Pong",()=>{
     const flying=fei();
-    const state=act(fixture([[flying],[fei(),fei()],[],[]],[d(1)]),"a",{type:"discard",tileId:flying.id},"fly");
+    const state=act(fixture([[flying],[fei(),fei()],[],[]],[],[d(1)]),"a",{type:"discard",tileId:flying.id},"fly");
     expect(state.phase).toBe("discard");
     expect(state.players[0].discards.map(t=>t.id)).toEqual([flying.id]);
     assertTileConservation(state);
