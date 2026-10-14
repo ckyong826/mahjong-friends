@@ -35,7 +35,7 @@ async function gateway(request:Request,env:Env):Promise<Response> {
       const created=await toRoom(stub,"create","POST",{code,playerId,tokenHash:await digestToken(token),nickname});
       if(created.status===409) continue; // Extremely rare room-code collision.
       if(!created.ok) return created;
-      const room=await created.json();
+      const room=(await created.json()) as Record<string,unknown>;
       return json({...room,membership:{playerId,reconnectToken:token}},201);
     }
     throw new RoomError(503,"暂时无法分配房间码，请重试");
@@ -50,7 +50,7 @@ async function gateway(request:Request,env:Env):Promise<Response> {
     const playerId=crypto.randomUUID();
     const joined=await toRoom(stub,"join","POST",{nickname,playerId,tokenHash:await digestToken(token)});
     if(!joined.ok) return joined;
-    const room=await joined.json();
+    const room=(await joined.json()) as Record<string,unknown>;
     return json({...room,membership:{playerId,reconnectToken:token}},201);
   }
   if(match.action==="state" && request.method==="GET") {
