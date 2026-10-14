@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import RoomLobby from "./RoomLobby";
 
 type Health = "checking" | "online" | "offline";
 
@@ -11,6 +12,7 @@ const checkpoints = [
 
 export default function App() {
   const [health, setHealth] = useState<Health>("checking");
+  const [inRoom,setInRoom] = useState(window.location.pathname.startsWith("/room/"));
 
   const checkHealth = useCallback(async () => {
     setHealth("checking");
@@ -46,20 +48,13 @@ export default function App() {
         <span className="edition">好友麻将 · 开发预览</span>
       </header>
 
-      <main>
+      <main>{inRoom ? <RoomLobby onPathChanged={setInRoom} /> : <>
         <section className="hero" aria-labelledby="hero-title">
           <div className="eyebrow"><span className="shine" /> PRIVATE MAHJONG NIGHTS</div>
           <h1 id="hero-title">老友凑一桌，<br /><em>随时开台。</em></h1>
-          <p className="hero-copy">花牌、飞牌、清楚分开的四家弃牌区。<br />不用下载，不用注册，未来只需分享一个房间链接。</p>
-          <div className="actions">
-            <button type="button" className="button-primary" disabled title="私人房间功能将在 Issue #4 实现">
-              创建房间 <span aria-hidden="true">↗</span>
-            </button>
-            <button type="button" className="button-secondary" disabled title="私人房间功能将在 Issue #4 实现">
-              加入房间
-            </button>
-          </div>
-          <p className="preview-note">※ 当前是基础工程预览，房间和牌局尚未开放。</p>
+          <p className="hero-copy">花牌、飞牌、清楚分开的四家弃牌区。<br />不用下载，不用注册，分享房间链接给朋友。</p>
+          <RoomLobby onPathChanged={setInRoom} />
+          <p className="preview-note">※ 房间等待室已实现，实际对战功能仍在开发中。</p>
         </section>
 
         <section className="table-illustration" aria-label="麻将桌布局预览">
@@ -87,6 +82,7 @@ export default function App() {
             ))}
           </div>
         </section>
+        </>}
       </main>
 
       <footer className="footer">
