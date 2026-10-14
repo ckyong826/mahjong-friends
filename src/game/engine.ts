@@ -210,6 +210,7 @@ function resolveClaims(state: GameState): void {
     return distA - distB;
   });
   const chosen = replies[0];
+  if (chosen.kind === "pass") throw new Error("Pass cannot win claim arbitration");
   if (chosen.kind === "win") {
     state.phase = "ended";
     state.outcome = {type:"win",winnerId:chosen.playerId,fromPlayerId:pending.fromPlayerId,selfDraw:false};
@@ -247,7 +248,7 @@ export function applyGameAction(previous: GameState, action: GameAction): GameSt
     removeFromHand(actor,[tile]);
     actor.discards.push(tile);
     state.lastDiscard = {fromPlayerId:actor.id,tile};
-    const eligiblePlayerIds = state.players.filter((p,i) => {
+    const eligiblePlayerIds = state.players.filter((_,i) => {
       if (i === actorIndex) return false;
       const opts = possibleClaims(state,i,tile,actorIndex);
       return opts.canWin || opts.canPong || opts.canKong || opts.chiTileIds.length > 0;
