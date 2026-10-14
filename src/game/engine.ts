@@ -259,6 +259,8 @@ export function applyGameAction(previous: GameState, action: GameAction): GameSt
   } else if (action.type === "claim") {
     requireAction(state.phase === "claims" && state.pendingDiscard !== null,"No claim window is open");
     const pending = state.pendingDiscard;
+    requireAction(["pass","win","chi","pong","kong"].includes(action.kind),"Unknown claim kind");
+    requireAction(action.tileIds === undefined || Array.isArray(action.tileIds),"Invalid claimed tile IDs");
     requireAction(pending.eligiblePlayerIds.includes(actor.id),"You are not eligible to claim");
     requireAction(!pending.responses.some((r) => r.playerId === actor.id),"You already responded to this discard");
     const fromIndex = playerIndex(state,pending.fromPlayerId);
@@ -305,6 +307,14 @@ export function applyGameAction(previous: GameState, action: GameAction): GameSt
   return state;
 }
 
+export interface PublicMeldView {
+  kind: MeldKind;
+  concealed: boolean;
+  fromPlayerId: string | null;
+  tileCount: number;
+  /** Hidden for concealed Kongs belonging to other players. */
+  tiles?: Tile[];
+}
 export interface PublicPlayerView {
   id: string;
   concealedCount: number;
@@ -312,7 +322,7 @@ export interface PublicPlayerView {
   hand?: Tile[];
   bonuses: Tile[];
   discards: Tile[];
-  melds: Meld[];
+  melds: PublicMeldView[];
 }
 export interface PlayerGameView {
   version: number;
@@ -345,7 +355,11 @@ export function projectPlayerView(state: GameState, viewerId: string): PlayerGam
       ...(i === viewer ? {hand:[...p.hand]} : {}),
       bonuses:[...p.bonuses],
       discards:[...p.discards],
-      melds:p.melds.map((m) => ({...m,tiles:[...m.tiles]}))
+      melds:p.melds.map((m) => ({
+        kind:m.kind,concealed:m.concealed,fromPlayerId:m.fromPlayerId,
+        tileCount:m.tiles.length,
+        ...(!m.concealed || i === viewer ? {tiles:[...m.tiles]} : {})
+      }))
     })),
     liveWallCount:state.wall.live.length,
     replacementWallCount:state.wall.replacement.length,
