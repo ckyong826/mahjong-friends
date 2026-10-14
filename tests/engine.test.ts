@@ -31,7 +31,13 @@ function fixture(
     outcome:null,processedActionIds:[],allTileIds
   };
 }
-const act=(s:GameState, playerId:string, value:Omit<GameAction,"playerId"|"actionId"|"expectedVersion">,label="action"):GameState=>
+type ActionInput =
+  | {type:"discard";tileId:string}
+  | {type:"claim";kind:"chi"|"pong"|"kong"|"win"|"pass";tileIds?:string[]}
+  | {type:"kong";kind:"concealed";tileIds:string[]}
+  | {type:"kong";kind:"added";tileId:string;meldIndex:number}
+  | {type:"win"};
+const act=(s:GameState, playerId:string, value:ActionInput,label="action"):GameState=>
   applyGameAction(s,{...value,playerId,actionId:label+"-"+s.version,expectedVersion:s.version} as GameAction);
 
 describe("server-authoritative game engine",()=>{
@@ -48,8 +54,10 @@ describe("server-authoritative game engine",()=>{
     const cat=all.find(x=>x.face.family==="animal"&&x.face.animal==="cat")!;
     const whiteDragon=all.find(x=>x.face.family==="dragon"&&x.face.dragon==="white")!;
     const others=all.filter(t=>![spring.id,cat.id,whiteDragon.id].includes(t.id));
-    const reserve=[...others.splice(-12),whiteDragon,cat];
-    const state=startRound({playerIds:ids,replacementCount:14,shuffledTiles:[...others,spring,...reserve]});
+    const fillerIds=new Set(others.filter(t=>t.face.family==="suit").slice(0,12).map(t=>t.id));
+    const reserve=[...others.filter(t=>fillerIds.has(t.id)),whiteDragon,cat];
+    const rest=others.filter(t=>!fillerIds.has(t.id));
+    const state=startRound({playerIds:ids,replacementCount:14,shuffledTiles:[...rest,spring,...reserve]});
     expect(state.players[0].bonuses.map(t=>t.id)).toEqual([spring.id,cat.id]);
     expect(state.players.map(p=>p.hand.length)).toEqual([14,13,13,13]);
     assertTileConservation(state);
@@ -160,6 +168,22 @@ describe("server-authoritative game engine",()=>{
     expect(JSON.stringify(view)).not.toContain('"allTileIds"');
     expect(JSON.stringify(view)).not.toContain('"replacement"');
     expect(()=>projectPlayerView(state,"stranger")).toThrow();
+  });
+  it("can finish a full deterministic four-seat round without losing tiles",()=>{
+    let state=startRound({playerIds:ids,deckOptions:{includeFlowers:false,feiCount:0},randomIndex:()=>0});
+    for (let turn=0;turn<150 && state.phase!=="ended";turn++) {
+      const player=state.players[state.currentPlayerIndex];
+      state=act(state,player.id,{type:"discard",tileId:player.hand[0].id},"round-discard");
+      if (state.phase==="claims") {
+        const responders=[...state.pendingDiscard!.eligiblePlayerIds];
+        for (const id of responders) {
+          state=act(state,id,{type:"claim",kind:"pass"},"round-pass");
+        }
+      }
+      assertTileConservation(state);
+    }
+    expect(state.phase).toBe("ended");
+    expect(state.outcome).toEqual({type:"draw"});
   });
   it("passes over non-claimable Fei without treating it as a natural Pong",()=>{
     const flying=fei();
