@@ -62,7 +62,17 @@ function roomSnapshot(room:RoomRecord,viewerId:string,now:number):{
  * No game state or auth data is sent via the lobby's public projection.
  */
 export class MahjongRoom extends DurableObject<Env> {
+  // Serialize room mutations across interleaving awaits, including joins for the
+  // final seat. A single Durable Object instance owns the room code.
+  private queue:Promise<void> = Promise.resolve();
   async fetch(request:Request):Promise<Response> {
+    const before=this.queue;
+    let release!:()=>void;
+    this.queue=new Promise<void>(resolve=>{release=resolve;});
+    await before;
+    try {return await this.handle(request);} finally {release();}
+  }
+  private async handle(request:Request):Promise<Response> {
     try {
       const path=new URL(request.url).pathname;
       const now=Date.now();
