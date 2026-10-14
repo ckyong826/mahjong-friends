@@ -49,10 +49,10 @@ function bearer(request:Request):string {
   return token;
 }
 function roomSnapshot(room:RoomRecord,viewerId:string,now:number):{
-  room:RoomPublicView; game?:ReturnType<typeof projectPlayerView>
+  room:RoomPublicView; viewerId:string; game?:ReturnType<typeof projectPlayerView>
 }{
   return {
-    room:publicRoom(room,now),
+    room:publicRoom(room,now),viewerId,
     ...(room.game ? {game:projectPlayerView(room.game,viewerId)}:{})
   };
 }
