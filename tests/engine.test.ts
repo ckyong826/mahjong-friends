@@ -185,6 +185,23 @@ describe("server-authoritative game engine",()=>{
     expect(state.phase).toBe("ended");
     expect(state.outcome).toEqual({type:"draw"});
   });
+  it("redacts concealed Kong identities from opponents while revealing tile count",()=>{
+    const kong=[c(8),c(8),c(8),c(8)];
+    const state=fixture([[],[],[],[]]);
+    state.players[0].melds=[{kind:"kong",tiles:kong,fromPlayerId:null,concealed:true}];
+    state.allTileIds.push(...kong.map(t=>t.id));
+    const opponent=projectPlayerView(state,"b");
+    const mine=projectPlayerView(state,"a");
+    expect(opponent.players[0].melds[0].tileCount).toBe(4);
+    expect(opponent.players[0].melds[0].tiles).toBeUndefined();
+    expect(mine.players[0].melds[0].tiles).toHaveLength(4);
+  });
+  it("rejects malformed claim kinds even when messages bypass TypeScript",()=>{
+    const disc=c(5);
+    const state=act(fixture([[disc],[c(5),c(5)],[],[]]),"a",{type:"discard",tileId:disc.id},"discard");
+    const spoofed={type:"claim",kind:"fake",playerId:"b",actionId:"bad-kind",expectedVersion:state.version};
+    expect(()=>applyGameAction(state,spoofed as unknown as GameAction)).toThrow("Unknown claim kind");
+  });
   it("passes over non-claimable Fei without treating it as a natural Pong",()=>{
     const flying=fei();
     const state=act(fixture([[flying],[fei(),fei()],[],[]],[],[d(1)]),"a",{type:"discard",tileId:flying.id},"fly");
