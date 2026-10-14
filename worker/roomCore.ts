@@ -1,4 +1,5 @@
-import type { RoomPublicView, RoomRules, Wind } from "../src/shared/room";
+import type { RoomPublicView, RoomRules } from "../src/shared/room";
+import type { Wind } from "../src/shared/tiles";
 import { startRound, type GameState } from "../src/game/engine";
 
 export interface RoomMember {
@@ -54,7 +55,7 @@ export function validateRules(input: unknown): RoomRules {
     throw new RoomError(400,"港式四人模式暂不支持动物牌或飞牌");
   }
   return {
-    variant:r.variant, seats:4, includeAnimals:r.includeAnimals,
+    variant:r.variant as "singapore-four-player" | "hong-kong-four-player", seats:4, includeAnimals:r.includeAnimals,
     feiCount:r.feiCount!, minimumFan:r.minimumFan!
   };
 }
