@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
+import MahjongTable, { type GameActionDraft } from "./MahjongTable";
 import type { RoomRules } from "./shared/room";
 import { useRoomSocket, type RoomSnapshot } from "./useRoomSocket";
 
@@ -43,14 +44,45 @@ export default function RoomLobby({onPathChanged}:{onPathChanged?:(inRoom:boolea
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState("");
   const [notice,setNotice]=useState("");
+  const inFlightVersion=useRef<number|null>(null);
+  const [submittedVersion,setSubmittedVersion]=useState<number|null>(null);
   const applySnapshot=useCallback((next:Snapshot)=>{
     setSnapshot(previous=>previous?.room.code===next.room.code &&
       (previous.revision??-1)>next.revision?previous:next);
   },[]);
-  const {status:socketStatus}=useRoomSocket(code,code?savedToken(code):"",{
+  const {status:socketStatus,sendAction}=useRoomSocket(code,code?savedToken(code):"",{
     onSnapshot:(next)=>{applySnapshot(next);setError("");},
-    onError:setError
+    onError:(message)=>{inFlightVersion.current=null;setSubmittedVersion(null);setError(message);}
   });
+  useEffect(()=>{
+    // A newer server version confirms the prior action; reconnect permits retry
+    // only after a fresh private state arrives.
+    if(submittedVersion!==null && snapshot?.game?.version!==submittedVersion) {
+      inFlightVersion.current=null;
+      setSubmittedVersion(null);
+    }
+  },[submittedVersion,snapshot?.game?.version]);
+  useEffect(()=>{
+    if(socketStatus==="disconnected") {
+      inFlightVersion.current=null;
+      setSubmittedVersion(null);
+    }
+  },[socketStatus]);
+  const play=(draft:GameActionDraft):void=>{
+    const game=snapshot?.game;
+    if(!game||socketStatus!=="connected"||inFlightVersion.current!==null)return;
+    const version=game.version;
+    inFlightVersion.current=version;
+    setSubmittedVersion(version);
+    setError("");
+    try {
+      sendAction({...draft,actionId:crypto.randomUUID(),expectedVersion:version});
+    } catch(err) {
+      inFlightVersion.current=null;
+      setSubmittedVersion(null);
+      setError(err instanceof Error?err.message:"无法发送游戏指令");
+    }
+  };
   const navigate=useCallback((next:string|null)=>{
     window.history.pushState({}, "",next?"/room/"+next:"/");
     setCode(next);setSnapshot(null);setError("");setNotice("");
@@ -155,6 +187,10 @@ export default function RoomLobby({onPathChanged}:{onPathChanged?:(inRoom:boolea
             <button type="button" className="button-secondary" onClick={()=>navigate(null)}>返回首页</button>
           </div>
         </div>
+      ) : room.state==="playing" && snapshot?.game ? (
+        <MahjongTable room={room} game={snapshot.game} viewerId={snapshot.viewerId}
+          connection={socketStatus} pending={submittedVersion!==null}
+          onAction={play} onCopyInvite={()=>{void share();}}/>
       ) : (
         <div className="lobby-room">
           <p className="eyebrow">PRIVATE ROOM · 好友等待室</p>
