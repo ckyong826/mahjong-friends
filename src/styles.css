@@ -159,3 +159,25 @@ button.mj-tile-selected{transform:translateY(-10px);outline:3px solid #f8d67f;ou
   .mj-hand .mj-tile{width:28px;height:41px}
   .mj-hand .mj-tile .mj-glyph{font-size:17px}
 }
+
+/* Issue #7 — transparent virtual score settlement */
+.mj-score-strip{display:flex;flex-wrap:wrap;gap:7px;padding:9px 0 13px}
+.mj-score-strip>div{flex:1;min-width:100px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 12px;border:1px solid #397662;background:#0c483b;border-radius:9px}
+.mj-score-strip span{font-size:12px;color:#c5dbc9;overflow:hidden;text-overflow:ellipsis}
+.mj-score-strip strong{font-size:14px;color:#f1d996;white-space:nowrap}
+.mj-score-strip .mj-negative{color:#f2a89e}
+.mj-score-strip small{flex-basis:100%;font-size:10px;color:#b3cfbd;text-align:right}
+.mj-settlement-lines{max-width:650px;margin:15px auto 10px;display:flex;flex-direction:column;gap:7px}
+.mj-settlement-lines>div{display:grid;grid-template-columns:minmax(100px,1fr) auto;gap:3px 12px;padding:10px 12px;border:1px solid #477863;border-radius:8px;background:#0b493d;text-align:left}
+.mj-settlement-lines>div span{font-size:13px;color:#fff2d5}
+.mj-settlement-lines>div span:nth-child(2){color:#f2ce79;font-weight:800}
+.mj-settlement-lines>div small{grid-column:1/-1;color:#b2cbbc;font-size:11px}
+.mj-settlement-totals{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin:13px auto;max-width:760px}
+.mj-settlement-totals>div{padding:11px 5px;display:flex;gap:5px;flex-direction:column;background:#0d5443;border-radius:8px;border:1px solid #679a79}
+.mj-settlement-totals span{font-size:12px;color:#cde3d4}
+.mj-settlement-totals strong{font-size:18px;color:#f4d78f}
+.mj-settlement-totals small{font-size:10px;color:#b4cfc1}
+.mj-next-round{margin-top:18px;padding:13px 6px 5px;border-top:1px solid #66967c}
+.mj-next-round p{color:#d6d8be;font-size:13px}
+.mj-next-round .mj-action{margin:5px}
+@media(max-width:490px){.mj-score-strip>div{min-width:calc(50% - 7px)}.mj-settlement-totals{grid-template-columns:repeat(2,minmax(0,1fr))}}
