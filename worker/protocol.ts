@@ -10,7 +10,8 @@ const tileId = (value: unknown): value is string =>
 const idList = (value: unknown, size: number): value is string[] =>
   Array.isArray(value) && value.length === size && value.every(tileId) &&
   new Set(value).size === value.length;
-export type ClientGameAction = Omit<GameAction, "playerId">;
+type StripPlayer<T> = T extends unknown ? Omit<T,"playerId"> : never;
+export type ClientGameAction = StripPlayer<GameAction>;
 export type ClientMessage =
   | { type: "sync" }
   | { type: "ping" }
