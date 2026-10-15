@@ -187,10 +187,13 @@ export default function RoomLobby({onPathChanged}:{onPathChanged?:(inRoom:boolea
             <button type="button" className="button-secondary" onClick={()=>navigate(null)}>返回首页</button>
           </div>
         </div>
-      ) : room.state==="playing" && snapshot?.game ? (
+      ) : (room.state==="playing" || room.state==="settlement") && snapshot?.game ? (
         <MahjongTable room={room} game={snapshot.game} viewerId={snapshot.viewerId}
           connection={socketStatus} pending={submittedVersion!==null}
-          onAction={play} onCopyInvite={()=>{void share();}}/>
+          onAction={play} onCopyInvite={()=>{void share();}}
+          isOwner={isOwner} lobbyBusy={busy}
+          onReady={()=>{void action("ready",{ready:!self?.ready});}}
+          onNextRound={()=>{void action("start");}}/>
       ) : (
         <div className="lobby-room">
           <p className="eyebrow">PRIVATE ROOM · 好友等待室</p>

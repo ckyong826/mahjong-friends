@@ -23,6 +23,10 @@ export interface MahjongTableProps {
   pending:boolean;
   onAction:(action:GameActionDraft)=>void;
   onCopyInvite:()=>void;
+  isOwner?:boolean;
+  lobbyBusy?:boolean;
+  onReady?:()=>void;
+  onNextRound?:()=>void;
 }
 
 function TileCard({tile,mini=false,selected=false,latest=false,onSelect,disabled=false}:{
@@ -106,7 +110,8 @@ const lookup=(hand:readonly Tile[],ids:readonly string[])=>ids.map(id=>{
 }).join(" ");
 
 export default function MahjongTable({
-  room,game,viewerId,connection,pending,onAction,onCopyInvite
+  room,game,viewerId,connection,pending,onAction,onCopyInvite,
+  isOwner=false,lobbyBusy=false,onReady,onNextRound
 }:MahjongTableProps) {
   const [selectedId,setSelectedId]=useState<string|null>(null);
   useEffect(()=>setSelectedId(null),[game.version]);
@@ -155,12 +160,22 @@ export default function MahjongTable({
     </div>
 
     <div className="mj-meta">
+      <span>第 <strong>{room.roundNumber??1}</strong> 局</span>
       <span>庄家 <strong>{room.players.find(p=>p.id===game.dealerId)?.nickname??"—"}</strong></span>
       <span>牌墙剩余 <strong>{game.liveWallCount}</strong></span>
       <span>补牌 <strong>{game.replacementWallCount}</strong></span>
       <span>第 <strong>{game.version+1}</strong> 次操作</span>
     </div>
 
+    <div className="mj-score-strip" aria-label="玩家累计虚拟积分">
+      {room.players.map(player=><div key={player.id}>
+        <span>{player.nickname}</span>
+        <strong className={(room.scores?.[player.id]??0)<0?"mj-negative":""}>
+          {room.scores?.[player.id]??0} 分
+        </strong>
+      </div>)}
+      <small>练习计分，非正式家规</small>
+    </div>
     <div className="mj-board" aria-label="四家独立弃牌区，每家各自显示打过的牌">
       {byPosition("top")}
       {byPosition("left")}
@@ -191,7 +206,29 @@ export default function MahjongTable({
       </div>
       {game.phase==="ended"?<div className="mj-results" role="status">
         <strong>{outcome?.type==="draw"?"本局流局":winner?.nickname+" 胡牌！"}</strong>
-        <p>实际计分、结算及下一局会在 Issue #7 完成。</p>
+        {room.lastSettlement&&<>
+          <p>第 {room.lastSettlement.roundNumber} 局 · 练习积分模式（不是官方新马麻将番数）</p>
+          <div className="mj-settlement-lines">
+            {room.lastSettlement.lines.map((line,i)=><div key={i}>
+              <span>{line.name}</span><span>+{line.fan} 番</span>
+              <small>{line.detail}</small>
+            </div>)}
+          </div>
+          <div className="mj-settlement-totals">
+            {room.players.map(player=><div key={player.id}>
+              <span>{player.nickname}</span>
+              <strong>{(room.lastSettlement!.delta[player.id]??0)>0?"+":""}{room.lastSettlement!.delta[player.id]??0} 分</strong>
+              <small>累计 {room.lastSettlement!.totals[player.id]??0} 分</small>
+            </div>)}
+          </div>
+        </>}
+        {room.state==="settlement"&&<div className="mj-next-round">
+          <p>下一局准备：{room.players.filter(p=>p.ready).length}/4 人</p>
+          {onReady&&<ActionButton kind="primary" disabled={lobbyBusy} onClick={onReady}>
+            {myPublic.ready?"取消准备":"准备下一局"}</ActionButton>}
+          {isOwner&&onNextRound&&<ActionButton disabled={lobbyBusy||room.players.some(p=>!p.ready)}
+            onClick={onNextRound}>所有人准备好后开下一局</ActionButton>}
+        </div>}
       </div>:<>
         {claim&&claimTile&&<div className="mj-claim-actions" aria-label="吃碰杠胡选择">
           <strong>有人打出了 {tileAppearance(claimTile).accessibleName}，你可以：</strong>

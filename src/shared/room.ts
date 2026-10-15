@@ -1,4 +1,5 @@
 import type { Wind } from "./tiles";
+import type { RoundOutcome } from "../game/engine";
 
 export type GameVariant =
   | "malaysia-three-player"
@@ -21,12 +22,32 @@ export interface PlayerPublicInfo {
   connected: boolean;
 }
 
+/** Non-official Mahjong test-points profile; never real-money scores. */
+export interface ScoreLine {
+  name:string;
+  fan:number;
+  detail:string;
+}
+export interface RoundSettlement {
+  roundNumber:number;
+  outcome:RoundOutcome;
+  mode:"practice-v1";
+  winnerId?:string;
+  payerId?:string;
+  fan:number;
+  lines:ScoreLine[];
+  delta:Record<string,number>;
+  totals:Record<string,number>;
+}
 export interface RoomPublicView {
   code: string;
   ownerId: string;
   players: PlayerPublicInfo[];
   rules: RoomRules;
   state: "waiting" | "playing" | "settlement";
+  roundNumber?:number;
+  scores?:Record<string,number>;
+  lastSettlement?:RoundSettlement|null;
 }
 
 /** Distinguish public room codes from private reconnect secrets. */

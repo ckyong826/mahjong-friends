@@ -5,7 +5,7 @@ import { parseClientMessage } from "./protocol";
 import { consumeTicket, pruneTickets, type TicketStore } from "./socketTicket";
 import {
   configureRoom, findMember, joinRoom, newRoom, publicRoom, readyRoom,
-  removeRoomMember, RoomError, startRoom, type RoomRecord
+  removeRoomMember, RoomError, settleRoom, startRoom, type RoomRecord
 } from "./roomCore";
 
 export interface Env {
@@ -210,10 +210,13 @@ export class MahjongRoom extends DurableObject<Env> {
           return;
         }
         assertTileConservation(next);
-        room.game=next;
-        room.revision++;
-        await this.ctx.storage.put("room",room); // commit before broadcasting
-        this.broadcast(room);
+        // Round settlement is deterministic and persisted once, atomically
+        // with the final accepted game action; never apply score twice.
+        const settled=next.phase==="ended"?
+          settleRoom({...room,game:next}):{...room,game:next};
+        settled.revision++;
+        await this.ctx.storage.put("room",settled); // commit before broadcasting
+        this.broadcast(settled);
       }catch(error) {
         const message=error instanceof Error ? error.message : "出牌请求失败";
         if(ws.readyState===WebSocket.OPEN) {
