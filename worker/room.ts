@@ -2,6 +2,7 @@ import { DurableObject } from "cloudflare:workers";
 import { applyGameAction, assertTileConservation, projectPlayerView } from "../src/game/engine";
 import type { RoomPublicView } from "../src/shared/room";
 import { parseClientMessage } from "./protocol";
+import { consumeTicket, pruneTickets, type TicketStore } from "./socketTicket";
 import {
   configureRoom, findMember, joinRoom, newRoom, publicRoom, readyRoom,
   removeRoomMember, RoomError, startRoom, type RoomRecord
@@ -51,17 +52,6 @@ function bearer(request:Request):string {
 }
 interface SocketAttachment {
   playerId: string;
-}
-interface SocketTicket {
-  playerId: string;
-  expiresAt: number;
-}
-type TicketStore=Record<string,SocketTicket>;
-
-/** Durable socket tickets expire after 30 seconds, are single-use, and have no
- * relationship to the reusable long-lived membership credential. */
-export function pruneTickets(tickets:TicketStore,now:number):TicketStore {
-  return Object.fromEntries(Object.entries(tickets).filter(([,value])=>value.expiresAt>now));
 }
 function authenticatedSnapshot(room:RoomRecord,viewerId:string,now:number,connectedIds:ReadonlySet<string>) {
   const published:RoomPublicView=publicRoom(room,now);
@@ -123,17 +113,15 @@ export class MahjongRoom extends DurableObject<Env> {
     const raw=new URL(request.url).searchParams.get("ticket")??"";
     if(!/^[a-f0-9]{64}$/.test(raw)) throw new RoomError(401,"无效 WebSocket 临时凭证");
     const digest=await digestToken(raw);
-    const all=pruneTickets(await this.ctx.storage.get<TicketStore>("socketTickets")??{},now);
-    const session=all[digest];
-    if(!session) throw new RoomError(401,"临时凭证已经使用或过期");
-    delete all[digest];
-    await this.ctx.storage.put("socketTickets",all);
-    if(!room.members.some(m=>m.id===session.playerId))throw new RoomError(403,"玩家已离开房间");
+    const consumed=consumeTicket(await this.ctx.storage.get<TicketStore>("socketTickets")??{},digest,now);
+    if(!consumed) throw new RoomError(401,"临时凭证已经使用或过期");
+    await this.ctx.storage.put("socketTickets",consumed.remaining);
+    if(!room.members.some(m=>m.id===consumed.playerId))throw new RoomError(403,"玩家已离开房间");
     const pair=new WebSocketPair();
     const [client,server]=Object.values(pair);
     this.ctx.acceptWebSocket(server);
-    server.serializeAttachment({playerId:session.playerId} satisfies SocketAttachment);
-    room={...room,members:room.members.map(m=>m.id===session.playerId?{...m,lastSeenAt:now}:m)};
+    server.serializeAttachment({playerId:consumed.playerId} satisfies SocketAttachment);
+    room={...room,members:room.members.map(m=>m.id===consumed.playerId?{...m,lastSeenAt:now}:m)};
     await this.ctx.storage.put("room",room);
     this.broadcast(room);
     return new Response(null,{status:101,webSocket:client});
