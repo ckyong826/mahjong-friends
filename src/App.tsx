@@ -45,7 +45,7 @@ export default function App() {
           <span className="brand-tile" aria-hidden="true">發</span>
           <span>Mahjong <strong>Friends</strong></span>
         </a>
-        <span className="edition">好友麻将 · 开发预览</span>
+        <span className="edition">好友麻将 · 四人联机测试版</span>
       </header>
 
       <main>{inRoom ? <RoomLobby onPathChanged={setInRoom} /> : <>
@@ -54,7 +54,7 @@ export default function App() {
           <h1 id="hero-title">老友凑一桌，<br /><em>随时开台。</em></h1>
           <p className="hero-copy">花牌、飞牌、清楚分开的四家弃牌区。<br />不用下载，不用注册，分享房间链接给朋友。</p>
           <RoomLobby onPathChanged={setInRoom} />
-          <p className="preview-note">※ 房间等待室已实现，实际对战功能仍在开发中。</p>
+          <p className="preview-note">※ 四人麻将桌已接入实时游戏引擎；计分与下一局功能仍在开发中。</p>
         </section>
 
         <section className="table-illustration" aria-label="麻将桌布局预览">
