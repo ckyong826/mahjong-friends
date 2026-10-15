@@ -3,7 +3,7 @@ import { makeRoomCode, ROOM_CODE_REGEX, RoomError, validateNickname } from "./ro
 import { digestToken, json, MahjongRoom, readBody, secureToken, type Env } from "./room";
 
 export { MahjongRoom };
-const actions = new Set(["ready","rules","start","leave","kick"]);
+const actions = new Set(["ready","rules","start","leave","kick","socket-ticket"]);
 function codeFrom(path:string):{code:string;action:string}|null {
   const found=path.match(/^\/api\/rooms\/([^/]+)(?:\/([^/]+))?$/);
   if(!found) return null;
@@ -22,7 +22,7 @@ async function toRoom(stub:ReturnType<typeof stubFor>,route:string,method:string
 async function gateway(request:Request,env:Env):Promise<Response> {
   const url=new URL(request.url);
   if(url.pathname==="/api/health" && request.method==="GET") {
-    return json({status:"ok",app:"mahjong-friends",stage:"private-lobby"});
+    return json({status:"ok",app:"mahjong-friends",stage:"realtime-websocket"});
   }
   if(url.pathname==="/api/rooms" && request.method==="POST") {
     const body=await readBody(request);
@@ -43,6 +43,20 @@ async function gateway(request:Request,env:Env):Promise<Response> {
   const match=codeFrom(url.pathname);
   if(!match || !ROOM_CODE_REGEX.test(match.code)) throw new RoomError(404,"找不到此房间");
   const stub=stubFor(env,match.code);
+  if(match.action==="ws" && request.method==="GET") {
+    if(request.headers.get("upgrade")?.toLowerCase()!=="websocket") {
+      throw new RoomError(426,"需要 WebSocket 升级请求");
+    }
+    // A short-lived, single-use ticket is minted using Bearer auth via the
+    // REST endpoint; the browser never puts its reusable membership token in a URL.
+    const origin=request.headers.get("origin");
+    if(origin && origin!==url.origin) throw new RoomError(403,"WebSocket 来源不合法");
+    const ticket=url.searchParams.get("ticket")??"";
+    if(!/^[a-f0-9]{64}$/.test(ticket)) throw new RoomError(401,"无效临时凭证");
+    return stub.fetch(new Request("https://rooms.internal/internal/ws?ticket="+ticket,{
+      method:"GET",headers:{"upgrade":"websocket"}
+    }));
+  }
   if(match.action==="join" && request.method==="POST") {
     const body=await readBody(request);
     const nickname=validateNickname(body.nickname);
