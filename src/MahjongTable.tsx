@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Tile } from "./shared/tiles";
 import type { PlayerGameView, PublicPlayerView } from "./game/engine";
 import type { PlayerPublicInfo, RoomPublicView } from "./shared/room";
@@ -96,7 +96,7 @@ function Seat({position,player,view,active,latest}:{
 }
 
 function ActionButton({children,onClick,disabled=false,kind="secondary"}:{
-  children:React.ReactNode;onClick:()=>void;disabled?:boolean;kind?:"primary"|"secondary"|"win"
+  children:ReactNode;onClick:()=>void;disabled?:boolean;kind?:"primary"|"secondary"|"win"
 }) {
   return <button type="button" className={"mj-action mj-action-"+kind} onClick={onClick} disabled={disabled}>{children}</button>;
 }
