@@ -17,6 +17,7 @@ export interface RoomRecord {
   rules: RoomRules;
   state: "waiting" | "playing";
   createdAt: number;
+  revision: number;
   game: GameState | null;
 }
 export class RoomError extends Error {
@@ -64,7 +65,7 @@ export function makeRoomCode(randomIndex: (upper:number)=>number): string {
 }
 export function newRoom(code:string,ownerId:string,tokenHash:string,nickname:string,now:number, rules:RoomRules=DEFAULT_RULES):RoomRecord {
   if (!ROOM_CODE_REGEX.test(code)) throw new RoomError(400,"无效房间码");
-  return {code,ownerId,createdAt:now,rules:validateRules(rules),state:"waiting",game:null,
+  return {code,ownerId,createdAt:now,revision:0,rules:validateRules(rules),state:"waiting",game:null,
     members:[{id:ownerId,tokenHash,nickname:validateNickname(nickname),seat:"east",ready:false,lastSeenAt:now}]};
 }
 export function findMember(room:RoomRecord,tokenHash:string): RoomMember {

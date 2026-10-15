@@ -1,8 +1,8 @@
 import { useCallback, useEffect, useState } from "react";
-import type { RoomPublicView, RoomRules } from "./shared/room";
-import type { PlayerGameView } from "./game/engine";
+import type { RoomRules } from "./shared/room";
+import { useRoomSocket, type RoomSnapshot } from "./useRoomSocket";
 
-type Snapshot={room:RoomPublicView;viewerId:string;game?:PlayerGameView;membership?:{playerId:string;reconnectToken:string}};
+type Snapshot=RoomSnapshot;
 const ROOM_CODE=/^[A-HJ-NP-Z2-9]{6}$/;
 const SESSION_PREFIX="mahjong-friends:room:";
 function currentCode():string|null {
@@ -43,6 +43,14 @@ export default function RoomLobby({onPathChanged}:{onPathChanged?:(inRoom:boolea
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState("");
   const [notice,setNotice]=useState("");
+  const applySnapshot=useCallback((next:Snapshot)=>{
+    setSnapshot(previous=>previous?.room.code===next.room.code &&
+      (previous.revision??-1)>next.revision?previous:next);
+  },[]);
+  const {status:socketStatus}=useRoomSocket(code,code?savedToken(code):"",{
+    onSnapshot:(next)=>{applySnapshot(next);setError("");},
+    onError:setError
+  });
   const navigate=useCallback((next:string|null)=>{
     window.history.pushState({}, "",next?"/room/"+next:"/");
     setCode(next);setSnapshot(null);setError("");setNotice("");
@@ -57,25 +65,27 @@ export default function RoomLobby({onPathChanged}:{onPathChanged?:(inRoom:boolea
     const token=savedToken(roomCode);
     if(!token) {setSnapshot(null);return;}
     const result=await api("/api/rooms/"+roomCode,{headers:{authorization:"Bearer "+token}});
-    setSnapshot(result);
-  },[]);
+    applySnapshot(result);
+  },[applySnapshot]);
   useEffect(()=>{
-    if(!code || !savedToken(code)) return;
+    if(!code || !savedToken(code))return;
     let active=true;
     const poll=async()=>{
-      try{
+      try {
         const token=savedToken(code);
         if(!token)return;
         const result=await api("/api/rooms/"+code,{headers:{authorization:"Bearer "+token}});
-        if(active)setSnapshot(result);
+        if(active)applySnapshot(result);
       }catch(err) {
-        if(active)setError(err instanceof Error?err.message:"网络连接失败");
+        if(active&&socketStatus!=="connected")setError(err instanceof Error?err.message:"网络连接失败");
       }
     };
-    void poll();
-    const interval=window.setInterval(()=>{if(document.visibilityState!=="hidden")void poll();},5000);
-    return ()=>{active=false;window.clearInterval(interval);};
-  },[code]);
+    // HTTP snapshot remains a fallback when the WebSocket has not connected.
+    if(socketStatus!=="connected")void poll();
+    const interval=socketStatus==="connected"?undefined:
+      window.setInterval(()=>{if(document.visibilityState!=="hidden")void poll();},15000);
+    return ()=>{active=false;if(interval!==undefined)window.clearInterval(interval);};
+  },[code,socketStatus,applySnapshot]);
   const run=async(task:()=>Promise<void>)=>{
     if(busy)return;
     setBusy(true);setError("");setNotice("");
@@ -86,14 +96,14 @@ export default function RoomLobby({onPathChanged}:{onPathChanged?:(inRoom:boolea
     const result=await api("/api/rooms",{method:"POST",body:JSON.stringify({nickname})});
     if(!result.membership)throw new Error("缺少身份凭证");
     remember(result.room.code,result.membership.reconnectToken);
-    navigate(result.room.code);setSnapshot(result);
+    navigate(result.room.code);applySnapshot(result);
   });
   const join=()=>run(async()=>{
     if(!code)throw new Error("请选择房间");
     const result=await api("/api/rooms/"+code+"/join",{method:"POST",body:JSON.stringify({nickname})});
     if(!result.membership)throw new Error("缺少身份凭证");
     remember(code,result.membership.reconnectToken);
-    setSnapshot(result);
+    applySnapshot(result);
   });
   const action=(verb:string,body:Record<string,unknown>={})=>run(async()=>{
     if(!code)throw new Error("无效的房间");
@@ -102,7 +112,7 @@ export default function RoomLobby({onPathChanged}:{onPathChanged?:(inRoom:boolea
       body:JSON.stringify(body)
     });
     if(verb==="leave"){forget(code);navigate(null);}
-    else setSnapshot(result);
+    else applySnapshot(result);
   });
   const enter=()=>{
     const proposed=enterCode.trim().toUpperCase();
@@ -191,7 +201,7 @@ export default function RoomLobby({onPathChanged}:{onPathChanged?:(inRoom:boolea
               <p>服务器已建立牌局，但实时对战与麻将桌界面还在开发中（Issues #5–#6）。目前不能操作出牌。</p>
             </div>
           )}
-          <p className="preview-note">等待室每 5 秒刷新一次；实时同步将在 Issue #5 加入。</p>
+          <p className="preview-note" role="status">实时连接：{socketStatus==="connected"?"已连接 ✓":socketStatus==="connecting"?"正在连接…":"断线重连中（HTTP 备用同步）"} · 游戏画面将在 Issue #6 加入。</p>
         </div>
       )}
       {error&&<p role="alert" className="room-error">{error}</p>}
