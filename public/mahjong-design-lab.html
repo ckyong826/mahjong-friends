@@ -149,7 +149,16 @@ function render(){
        event.stopPropagation();
        var direction=Number(button.dataset.page);
        page=Math.max(0,Math.min(1,page+direction));
-       render();
+       // Update only this dialog. Replacing the whole game scene during the
+       // pointer click can dismiss the overlay or lose keyboard focus.
+       var visible="";
+       for(var i=page*12;i<page*12+12&&i<24;i++)visible+=miniTile(openRiver,i);
+       var modal=screen.querySelector(".detail-card");
+       if(!modal)return;
+       modal.querySelector(".mini-grid").innerHTML=visible;
+       modal.querySelector(".detail-tools span").textContent=(page+1)+" / 2";
+       modal.querySelector('[data-page="-1"]').disabled=(page===0);
+       modal.querySelector('[data-page="1"]').disabled=(page===1);
      });
    });
    var closeButton=screen.querySelector(".detail-tools [data-close]");
