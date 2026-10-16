@@ -107,7 +107,11 @@ function Seat({position,player,view,active,latest,score,windByPlayer,dealer,arri
   const [openPanel,setOpenPanel]=useState<"river"|"public"|null>(null);
   const [historyPage,setHistoryPage]=useState(0);
   const dialogRef=useRef<HTMLDivElement>(null);
-  useEffect(()=>{if(openPanel)dialogRef.current?.focus();},[openPanel]);
+  const dialogTrigger=useRef<HTMLButtonElement|null>(null);
+  useEffect(()=>{
+    if(openPanel)dialogRef.current?.focus();
+    else dialogTrigger.current?.focus();
+  },[openPanel]);
   const allRows=riverRows(view.discards);
   const visibleRows=allRows.slice(-2);
   const earlierTiles=view.discards.length-visibleRows.reduce((total,line)=>total+line.length,0);
@@ -115,7 +119,11 @@ function Seat({position,player,view,active,latest,score,windByPlayer,dealer,arri
   const publicPageCount=Math.max(1,Math.ceil(view.melds.length/2),Math.ceil(view.bonuses.length/4));
   const currentPageCount=openPanel==="river"?historyPageCount:publicPageCount;
   const page=Math.min(historyPage,currentPageCount-1);
-  const showPanel=(kind:"river"|"public")=>{setHistoryPage(0);setOpenPanel(kind);};
+  const showPanel=(kind:"river"|"public",trigger:HTMLButtonElement)=>{
+    dialogTrigger.current=trigger;
+    setHistoryPage(0);
+    setOpenPanel(kind);
+  };
   return <section className={"mj-seat mj-seat-"+position+(active?" mj-seat-turn":"")}
       aria-label={player.nickname+" 的弃牌区"}>
     <div className="mj-seat-header">
@@ -146,7 +154,7 @@ function Seat({position,player,view,active,latest,score,windByPlayer,dealer,arri
     <div className="mj-discard-panel">
       <div className="mj-discard-title">
         <span>弃牌 {view.discards.length}</span>
-        <button type="button" className="mj-river-open" onClick={()=>showPanel("river")}
+        <button type="button" className="mj-river-open" onClick={event=>showPanel("river",event.currentTarget)}
           aria-label={"查看 "+player.nickname+" 全部弃牌"}>
           {earlierTiles>0?"较早 +"+earlierTiles:"全部"} ↗
         </button>
@@ -167,14 +175,31 @@ function Seat({position,player,view,active,latest,score,windByPlayer,dealer,arri
     <div className="mj-public-tray">
       <DisplayMelds player={{...view,bonuses:view.bonuses.slice(0,2),melds:view.melds.slice(0,1)}}
         windByPlayer={windByPlayer}/>
-      <button type="button" className="mj-public-open" onClick={()=>showPanel("public")}
+      <button type="button" className="mj-public-open" onClick={event=>showPanel("public",event.currentTarget)}
         aria-label={"查看 "+player.nickname+" 全部公开组合与花牌"}>
         明{view.melds.length} 花{view.bonuses.length} ↗
       </button>
     </div>
+    {openPanel&&<div className="mj-history-backdrop" aria-hidden="true"
+      onClick={()=>setOpenPanel(null)}/>}
     {openPanel&&<div className="mj-history-dialog" role="dialog" aria-modal="true"
       ref={dialogRef} tabIndex={-1} aria-label={player.nickname+(openPanel==="river"?" 的完整弃牌记录":" 的全部公开组合")}
-      onKeyDown={event=>{if(event.key==="Escape"){event.stopPropagation();setOpenPanel(null);}}}>
+      onKeyDown={event=>{
+        if(event.key==="Escape"){
+          event.stopPropagation();
+          setOpenPanel(null);
+          return;
+        }
+        if(event.key!=="Tab")return;
+        const items=Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>("button:not(:disabled)"));
+        if(!items.length){event.preventDefault();return;}
+        const first=items[0],last=items[items.length-1];
+        if(event.shiftKey&&(document.activeElement===first||document.activeElement===event.currentTarget)){
+          event.preventDefault();last.focus();
+        }else if(!event.shiftKey&&(document.activeElement===last||document.activeElement===event.currentTarget)){
+          event.preventDefault();first.focus();
+        }
+      }}>
       <div className="mj-history-heading">
         <strong>{player.nickname} · {openPanel==="river"?"按出牌时间排列":"公开明牌与花牌"}</strong>
         <button type="button" onClick={()=>setOpenPanel(null)}>关闭</button>
