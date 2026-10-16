@@ -15,7 +15,7 @@ function readOnlyFixture(overrides={}) {
     if(path in overrides)return overrides[path];
     if(path==="/api/health")return json({status:"ok",app:"mahjong-friends"});
     if(path==="/")return html("<title>Mahjong Friends</title>");
-    if(path==="/mahjong-design-lab.html")return html("<title>Mahjong Design Lab</title>");
+    if(path==="/mahjong-design-lab")return html("<title>Mahjong Design Lab</title>");
     if(path==="/api/rooms/not-a-valid-code")return json({error:"Not Found"},404);
     throw new Error("Unexpected path "+path);
   };
@@ -26,7 +26,7 @@ test("production read-only smoke performs only GETs and verifies all four endpoi
   const result=await smokeReadOnly(base,{fetchImpl:fixture.fetchImpl,log:x=>logs.push(x)});
   assert.equal(result.mode,"read-only");
   assert.deepEqual(fixture.paths.map(x=>x.path),[
-    "/api/health","/","/mahjong-design-lab.html","/api/rooms/not-a-valid-code"
+    "/api/health","/","/mahjong-design-lab","/api/rooms/not-a-valid-code"
   ]);
   assert.ok(fixture.paths.every(x=>x.options.redirect==="manual" &&
     x.options.cache==="no-store" && x.options.method===undefined));
@@ -44,7 +44,7 @@ test("rejects HTML error fallbacks, false health and redirects",async()=>{
   for(const override of [
     {"/api/health":json({status:"ok",app:"other-product"})},
     {"/api/rooms/not-a-valid-code":html("<title>Mahjong Friends</title>")},
-    {"/mahjong-design-lab.html":new Response(null,{status:302,headers:{location:"/"}})}
+    {"/mahjong-design-lab":new Response(null,{status:302,headers:{location:"/"}})}
   ]){
     await assert.rejects(smokeReadOnly(base,{fetchImpl:readOnlyFixture(override).fetchImpl}));
   }
