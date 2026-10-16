@@ -3,7 +3,7 @@ import { makeRoomCode, ROOM_CODE_REGEX, RoomError, validateNickname } from "./ro
 import { digestToken, json, MahjongRoom, readBody, secureToken, type Env } from "./room";
 
 export { MahjongRoom };
-const actions = new Set(["ready","rules","start","leave","kick","socket-ticket"]);
+const actions = new Set(["ready","rules","start","leave","kick","fill-bots","socket-ticket"]);
 function codeFrom(path:string):{code:string;action:string}|null {
   const found=path.match(/^\/api\/rooms\/([^/]+)(?:\/([^/]+))?$/);
   if(!found) return null;
