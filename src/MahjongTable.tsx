@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import type { Tile } from "./shared/tiles";
+import TileFaceArt from "./game/TileFaceArt";
 import type { PlayerGameView, PublicPlayerView } from "./game/engine";
 import type { PlayerPublicInfo, RoomPublicView } from "./shared/room";
 import {
@@ -38,10 +39,7 @@ function TileCard({tile,mini=false,selected=false,latest=false,onSelect,disabled
     "mj-tile","mj-"+style.variant,mini?"mj-tile-mini":"",
     selected?"mj-tile-selected":"",latest?"mj-tile-latest":""
   ].filter(Boolean).join(" ");
-  const inner=<>
-    <span aria-hidden="true" className="mj-glyph">{style.glyph}</span>
-    {style.suit&&<span aria-hidden="true" className="mj-suit">{style.suit}</span>}
-  </>;
+  const inner=<TileFaceArt face={tile.face}/>;
   if(onSelect) {
     return <button type="button" className={className} disabled={disabled}
       aria-label={"选择 "+style.accessibleName} aria-pressed={selected}
