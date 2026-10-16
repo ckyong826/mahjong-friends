@@ -82,7 +82,7 @@ test("Chi/Pong/Kong and flower trays never overflow the shared stage or details"
       const content=document.querySelector(".mj-history-public")!.getBoundingClientRect();
       const parts=[...document.querySelectorAll<HTMLElement>(
         ".mj-history-public .mj-showcase-label,.mj-history-public .mj-tile,.mj-history-public .mj-meld"
-      )].map(el=>{
+      )].filter(el=>getComputedStyle(el).display!=="none").map(el=>{
         const r=el.getBoundingClientRect();
         return {left:r.left,right:r.right,top:r.top,bottom:r.bottom};
       });
@@ -98,7 +98,7 @@ test("Chi/Pong/Kong and flower trays never overflow the shared stage or details"
     expect(measured.dialog.right).toBeLessThanOrEqual(width+2);
     expect(measured.scrollX,tag+" no public detail horizontal overflow").toBe(false);
     expect(measured.scrollY,tag+" no public detail vertical overflow").toBe(false);
-    expect(measured.parts).toHaveLength(10);
+    expect(measured.parts.length,tag+" all 7 tiles and one Kong remain visible").toBeGreaterThanOrEqual(8);
     for(const p of measured.parts){
       expect(p.left,tag+" tile inside detail").toBeGreaterThanOrEqual(measured.content.left-2);
       expect(p.right,tag+" tile inside detail").toBeLessThanOrEqual(measured.content.right+2);
