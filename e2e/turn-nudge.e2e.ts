@@ -26,9 +26,9 @@ test("after 30 seconds, guest reminds only active host, white screen pulses once
     await nudge.click();
     await expect(page.getByRole("alert",{name:"轮到你出牌了"})).toBeVisible({timeout:10_000});
     await expect(page.getByText("其他玩家正在等你")).toBeVisible();
+    await expect(guest.getByText("已提醒当前玩家出牌")).toBeVisible();
     await expect(page.locator(".mj-attention-overlay")).toHaveCount(0,{timeout:5_000});
     await expect(nudge).toBeHidden();
-    await expect(guest.getByText("已提醒当前玩家出牌")).toBeVisible();
     // The actor's screen must never turn white as a side effect.
     await expect(guest.locator(".mj-attention-overlay")).toHaveCount(0);
   }finally{await guestContext.close();}
