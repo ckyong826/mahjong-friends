@@ -34,6 +34,19 @@ test("solo practice: host fills three seats, bots play real turns and reload pre
   await page.reload();
   await expect(page.locator(".mj-game")).toBeVisible();
   await expect(page.locator(".mj-river")).toHaveCount(4);
-  await expect(page.locator(".mj-seat-bottom .mj-river .mj-tile")).toHaveCount(1);
+  // A legitimate Bot Chow/Pong/Kong can move the initial discard out of
+  // the human's river. Persistence must conserve the tile in a river or
+  // public meld, not assume it remains where it was originally discarded.
+  await expect.poll(async()=>page.evaluate(async(roomCode)=>{
+    const token=localStorage.getItem("mahjong-friends:room:"+roomCode);
+    const response=await fetch("/api/rooms/"+roomCode,{
+      headers:{authorization:"Bearer "+token},cache:"no-store"
+    });
+    const snapshot=await response.json() as {
+      game?:{players:Array<{discards:unknown[];melds:Array<{tileCount:number}>}>}
+    };
+    return snapshot.game?.players.reduce((n,p)=>
+      n+p.discards.length+p.melds.reduce((m,meld)=>m+meld.tileCount,0),0)??0;
+  },code),{timeout:10_000}).toBeGreaterThan(0);
   await expect(page.locator(".mj-seat-right .mj-seat-header")).toContainText("🤖");
 });
