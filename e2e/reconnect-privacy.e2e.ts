@@ -28,6 +28,9 @@ test("two humans and two bots: reload preserves identity and never leaks another
     await page.goto("/");
     await page.getByRole("textbox",{name:"你的昵称"}).fill("房主安全测试");
     await page.getByRole("button",{name:/创建私人房间/}).click();
+    // Creating a room is asynchronous: waiting only for the click can read
+    // the old "/" pathname, causing the guest to navigate to /room/ instead.
+    await expect(page).toHaveURL(/\\/room\\/[A-HJ-NP-Z2-9]{6}$/);
     const roomCode=new URL(page.url()).pathname.split("/").at(-1)!;
 
     await guest.goto("/room/"+roomCode);
