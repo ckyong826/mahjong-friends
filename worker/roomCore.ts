@@ -106,7 +106,7 @@ export function joinRoom(room:RoomRecord,playerId:string,tokenHash:string,nickna
   scores[playerId]=0;
   return {...room,scores,members:[...members,{
     id:playerId,tokenHash,nickname:validatedName,seat,ready:false,lastSeenAt:now
-  }].sort((a,b)=>winds.indexOf(a.seat)-winds.indexOf(b.seat))};
+  }]};
 }
 export function readyRoom(room:RoomRecord,playerId:string,ready:boolean):RoomRecord {
   if(room.state !== "waiting" && room.state !== "settlement") throw new RoomError(409,"牌局已经开始");
