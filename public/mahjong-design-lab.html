@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="theme-color" content="#091e1c">
-<meta name="description" content="Mahjong Friends v2 - 10 UI/UX proposals, no nested scroll and no clipped actions.">
+<meta name="description" content="Mahjong Friends v2 - 10 distinct tabletop layouts, no nested scroll and no clipped actions.">
 <title>Mahjong Friends / 10 UI·UX concept prototypes</title>
 <style>
 *{box-sizing:border-box}html{background:#0c1718;color:#eef5eb;font-family:Inter,"Noto Sans SC",system-ui,-apple-system,sans-serif}body{margin:0}button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid #9feac0;outline-offset:2px}button:disabled{opacity:.4;cursor:not-allowed}.shell{width:min(1520px,100%);margin:auto;padding:22px clamp(12px,3vw,35px) 55px}.shell-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}.logo{font-weight:900;font-size:16px;letter-spacing:.16em;color:#b5f2c8}.eyebrow{font-size:11px;letter-spacing:.18em;color:#80a69a;text-transform:uppercase}.shell h1{font-size:clamp(23px,3vw,38px);line-height:1.12;margin:12px 0 9px;font-weight:850;letter-spacing:-.05em}.intro{max-width:990px;color:#a9c0b8;font-size:13px;line-height:1.65;margin:0 0 15px}.shell-pill{border:1px solid #55786e;border-radius:25px;padding:8px 12px;font-size:11px;color:#b7d4c6;white-space:nowrap}.device-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:13px 0 12px}.device-row button,.small-action{border:1px solid #41645c;border-radius:8px;color:#b9d5c9;background:#17332d;padding:9px 12px;font-size:12px;font-weight:700}.device-row button[aria-pressed=true]{background:#d6edcc;color:#15352c;border-color:#d6edcc}.proto-info{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin:8px 0 12px}.proto-title{font-size:20px;font-weight:800}.proto-sub{font-size:12px;color:#9fbaad;margin:5px 0 0;max-width:780px;line-height:1.55}.prototype-shell{border:1px solid #375950;border-radius:15px;background:radial-gradient(ellipse at 50% 0%,#233b36,#102423 66%);padding:12px;overflow:hidden}.stage{width:100%;overflow:hidden;display:flex;align-items:flex-start;justify-content:center;position:relative;min-height:180px}.screen{--bg:#0a4438;--felt:#165a45;--card:#184b3d;--accent:#f2d687;--ink:#f6f5e9;--muted:#b7cfc0;--tile:#fff8ea;--tileInk:#27644f;--tileEdge:#b0a98e;--border:rgba(208,239,200,.22);position:absolute;left:50%;top:0;transform-origin:top center;color:var(--ink);background:var(--bg);width:1100px;height:620px;overflow:hidden;isolation:isolate;font-family:Inter,"Noto Sans SC",system-ui,sans-serif}.screen::before{content:"";position:absolute;inset:55px 23px 100px;border:2px solid var(--border);border-radius:28px;pointer-events:none}.screen *{box-sizing:border-box}.game-header{position:absolute;top:0;left:0;right:0;height:61px;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 29px;z-index:3;background:rgba(0,0,0,.10);border-bottom:1px solid var(--border)}.game-brand{font-size:15px;font-weight:900;letter-spacing:.08em;color:var(--accent)}.game-brand small{display:block;color:var(--muted);font-weight:500;font-size:9px;letter-spacing:.12em;margin-top:3px}.game-top-data{display:flex;gap:9px;align-items:center}.game-top-data span{font-size:12px;border:1px solid var(--border);border-radius:7px;padding:6px 9px;white-space:nowrap}.game-top-data b{color:var(--accent)}.game-table{position:absolute;inset:62px 23px 121px;background:radial-gradient(ellipse at center,var(--felt),transparent 74%);border-radius:24px;overflow:hidden}.seat{position:absolute;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:7px;overflow:hidden;box-shadow:0 4px 14px #00000012;z-index:1}.seat.top{width:320px;height:138px;top:8px;left:calc(50% - 160px)}.seat.bottom{width:320px;height:122px;bottom:6px;left:calc(50% - 160px)}.seat.left{width:258px;height:245px;top:110px;left:12px}.seat.right{width:258px;height:245px;top:110px;right:12px}.seat-h{display:flex;align-items:center;gap:6px;min-width:0;height:21px}.avatar{width:19px;height:19px;border-radius:6px;background:var(--accent);color:var(--card);display:grid;place-items:center;font-size:11px;font-weight:900;flex:none}.seat-name{font-size:12px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:115px}.seat-score{font-size:10px;margin-left:auto;color:var(--accent);font-weight:800;white-space:nowrap}.dealer{font-size:9px;border-radius:4px;color:var(--bg);background:var(--accent);padding:2px 4px;font-weight:900}.active{box-shadow:inset 0 0 0 1px var(--accent),0 0 16px rgba(254,232,132,.23)}.seat-sub{font-size:9px;color:var(--muted);height:14px;white-space:nowrap;overflow:hidden}.mini-grid{display:grid;grid-template-columns:repeat(6,19px);grid-auto-rows:22px;gap:2px;align-content:start;justify-content:center;margin:4px auto 0;width:max-content;max-width:100%}.mini-tile{background:var(--tile);color:var(--tileInk);border-radius:2px;border-bottom:2px solid var(--tileEdge);font-size:9px;font-weight:900;display:grid;place-items:center;line-height:1;box-shadow:0 1px 2px #0002}.mini-tile.red{color:#c54e47}.mini-tile.special{color:#bd8b2f}.seat-river-footer{font-size:9px;color:var(--muted);text-align:center;margin:3px 0 0;display:flex;gap:6px;align-items:center;justify-content:center}.river-expand{border:1px solid var(--border);background:transparent;color:var(--accent);border-radius:4px;padding:2px 5px;font-size:9px}.meld{font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px;text-align:center}.center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:124px;width:304px;border:1px solid var(--border);border-radius:17px;background:var(--card);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;text-align:center;padding:12px;z-index:1}.center-logo{font-size:32px;font-weight:900;color:var(--accent);line-height:1}.center-status{font-weight:850;color:var(--ink);font-size:16px}.center-meta{font-size:10px;color:var(--muted)}.hand-dock{position:absolute;bottom:0;left:0;right:0;height:121px;border-top:2px solid var(--border);background:var(--card);padding:8px 22px;display:flex;gap:18px;align-items:center;justify-content:center;overflow:hidden}.hand-area{display:flex;flex-direction:column;justify-content:center;gap:5px;min-width:0}.hand-label{font-size:10px;font-weight:800;color:var(--muted);height:15px}.hand-tiles{display:flex;gap:3px;flex-wrap:nowrap;align-items:flex-end;justify-content:center}.my-tile{width:34px;height:52px;flex:none;background:var(--tile);color:var(--tileInk);border:1px solid var(--tileEdge);border-bottom:5px solid #87b09b;border-radius:5px 5px 4px 4px;font-size:14px;font-weight:900;display:grid;place-items:center;padding:0;transition:transform .12s,box-shadow .12s;box-shadow:0 2px 3px #0002}.my-tile.sel{transform:translateY(-8px);box-shadow:0 0 0 2px var(--accent)}.my-tile.red{color:#c1494a}.my-tile.special{border-color:#d7ac55;color:#b9871c}.dock-actions{display:grid;grid-template-columns:100px 100px;gap:6px;align-items:center;align-content:center}.action{min-width:0;padding:9px 10px;min-height:38px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--ink);font-size:11px;font-weight:850;white-space:nowrap}.action.primary{grid-column:span 2;background:var(--accent);color:var(--bg);border-color:var(--accent)}.demo-toast{position:absolute;z-index:8;left:50%;bottom:126px;transform:translateX(-50%);background:var(--accent);color:var(--bg);padding:7px 14px;font-weight:850;font-size:11px;border-radius:20px}.detail-overlay{position:absolute;z-index:10;inset:0;background:rgba(2,15,12,.72);display:flex;align-items:center;justify-content:center}.detail-card{width:min(470px,calc(100% - 34px));max-height:calc(100% - 26px);overflow:hidden;background:var(--card);border:2px solid var(--accent);border-radius:17px;padding:16px;display:flex;flex-direction:column;gap:9px}.detail-card h3{margin:0;font-size:18px}.detail-card p{margin:0;font-size:11px;color:var(--muted)}.detail-card .mini-grid{grid-template-columns:repeat(8,27px);grid-auto-rows:33px;gap:3px;margin:8px auto}.detail-card .mini-tile{font-size:12px}.detail-tools{display:flex;justify-content:center;gap:10px;align-items:center}.detail-tools button{border:1px solid var(--border);border-radius:6px;background:var(--felt);color:var(--ink);padding:7px 11px}.detail-tools .close{background:var(--accent);color:var(--bg)}.tipbar{font-size:11px;line-height:1.5;color:#a3c2b4;margin-top:10px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.tipbar strong{color:#e6edbe}.concepts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:14px}.concept{min-width:0;display:flex;flex-direction:column;text-align:left;padding:9px;border-radius:12px;border:1px solid #3b5a54;background:#132a27;color:#eaf4e9}.concept[aria-pressed=true]{border-color:#d6f0bd;box-shadow:0 0 0 1px #d6f0bd;background:#1c3731}.thumb{height:96px;width:100%;border-radius:8px;position:relative;background:var(--bg);border:1px solid var(--border);overflow:hidden;margin-bottom:9px}.thumb:before{content:"";position:absolute;inset:16px 8px 21px;border:1px solid var(--border);border-radius:6px;background:var(--felt)}.thumb .tt{position:absolute;background:var(--card);border:1px solid var(--border);border-radius:3px}.thumb .ta{top:20px;left:38%;width:24%;height:20%}.thumb .tl{top:34%;left:11px;width:26%;height:40%}.thumb .tr{top:34%;right:11px;width:26%;height:40%}.thumb .tb{bottom:23px;left:38%;width:24%;height:20%}.thumb .tc{position:absolute;top:44%;left:42%;width:16%;height:19%;border-radius:5px;border:1px solid var(--accent);background:var(--card)}.thumb .td{position:absolute;bottom:3px;left:9px;right:9px;height:13px;background:var(--card);border-top:2px solid var(--accent);border-radius:3px}.concept-id{font-size:9px;color:#9dbcb2;letter-spacing:.10em}.concept strong{font-size:13px;display:block;margin-top:2px}.concept small{color:#9db8af;font-size:10px;line-height:1.4;margin-top:4px;min-height:28px}.labeled{display:inline-block;color:var(--accent);font-size:9px;white-space:nowrap;font-weight:800}.footer-note{font-size:12px;color:#93b5a9;line-height:1.6;margin-top:14px;border-top:1px solid #38594f;padding-top:12px}.footer-note a{color:#c8eed3}.seat.compact-content .seat-sub{display:none}
@@ -63,13 +63,114 @@
 .screen[data-id="10"][data-device="landscape"] .seat.left,.screen[data-id="10"][data-device="landscape"] .seat.right{width:175px}
 
 @media(max-width:1100px){.concepts{grid-template-columns:repeat(5,minmax(0,1fr))}}@media(max-width:750px){.concepts{grid-template-columns:repeat(2,minmax(0,1fr))}.shell{padding:14px 11px 40px}.prototype-shell{padding:5px}.concept{padding:7px}.thumb{height:83px}}@media(prefers-reduced-motion:reduce){.my-tile{transition:none}}
+/* V2 spatial concepts: each card has a genuinely different GRID PLACEMENT.
+   A common palette is intentional so differences cannot be mistaken for new skins. */
+.screen[data-layout-v2]{--bg:#082f2c;--felt:#0d5142;--card:#123e34;--accent:#f0d58f;--ink:#f7f6e7;--muted:#afcbbd;--tile:#fcf6e7;--tileInk:#1d7657;--tileEdge:#c5b594;--border:#81b49d77}
+.screen[data-layout-v2] .game-table{
+ display:grid!important;gap:6px;align-items:stretch;justify-items:stretch;
+ padding:7px;overflow:hidden;grid-auto-flow:row;
+ background:linear-gradient(145deg,#115e49,#0b493d);
+ box-shadow:inset 0 0 0 1px #a8cdb459;
+}
+.screen[data-layout-v2] .seat{
+ position:relative!important;left:auto!important;right:auto!important;
+ top:auto!important;bottom:auto!important;transform:none!important;
+ width:auto!important;height:auto!important;min-width:0;min-height:0;
+ padding:5px;display:flex;flex-direction:column;align-items:stretch;
+ gap:1px;border-radius:9px;overflow:hidden!important;
+ background:linear-gradient(160deg,#174b3e,#0f392f);
+}
+.screen[data-layout-v2] .seat.top{grid-area:top}
+.screen[data-layout-v2] .seat.left{grid-area:left}
+.screen[data-layout-v2] .seat.right{grid-area:right}
+.screen[data-layout-v2] .seat.bottom{grid-area:bottom}
+.screen[data-layout-v2] .seat .seat-h{flex:0 0 auto;min-height:13px}
+.screen[data-layout-v2] .seat .seat-sub{display:none}
+.screen[data-layout-v2] .seat .mini-grid{
+ flex:none;margin:2px auto 1px;grid-template-columns:repeat(6, minmax(0, 16px));
+ grid-auto-rows:19px;column-gap:2px;row-gap:2px;min-height:0;max-width:100%;
+ overflow:hidden;
+}
+.screen[data-layout-v2] .seat .meld{display:block!important;flex:0 0 auto;font-size:9px;line-height:12px;margin-top:1px;text-align:center}
+.screen[data-layout-v2] .seat .seat-river-footer{order:6;flex:0 0 auto;line-height:13px;margin-top:auto;margin-bottom:0}
+.screen[data-layout-v2] .seat .river-expand{font-size:9px;padding:1px 4px;line-height:11px}
+.screen[data-layout-v2] .center{
+ position:relative!important;grid-area:center;left:auto!important;top:auto!important;
+ bottom:auto!important;right:auto!important;transform:none!important;
+ width:100%!important;height:100%!important;min-width:0;min-height:0;
+ background:#103d33;border:1px dashed #d9d29688;border-radius:9px;
+ gap:4px;padding:7px;overflow:hidden;
+}
+.screen[data-layout-v2] .center-logo{font-size:22px}
+.screen[data-layout-v2] .center-status{font-size:14px;line-height:1.2}
+.screen[data-layout-v2] .center-meta{font-size:9px;line-height:1.25}
+.screen[data-layout-v2] .hand-dock{background:#0e382f}
+.screen[data-layout-v2] .mini-tile{min-width:0}
+.screen[data-layout-v2] .seat.bottom .seat-sub{display:none}
+.screen[data-layout-v2][data-device="landscape"] .game-table{gap:3px;padding:3px}
+.screen[data-layout-v2][data-device="landscape"] .seat{padding:2px;gap:0}
+.screen[data-layout-v2][data-device="landscape"] .seat-h{height:13px}
+.screen[data-layout-v2][data-device="landscape"] .seat .mini-grid{
+ grid-template-columns:repeat(6,minmax(0,12px));grid-auto-rows:13px;gap:1px;margin:1px auto 0;
+}
+.screen[data-layout-v2][data-device="landscape"] .seat .meld{
+ font-size:7px;line-height:9px;margin:0;
+}
+.screen[data-layout-v2][data-device="landscape"] .seat .seat-river-footer{
+ line-height:9px;font-size:7px;gap:2px
+}
+.screen[data-layout-v2][data-device="landscape"] .seat .river-expand{font-size:7px;line-height:9px;padding:0 2px}
+.screen[data-layout-v2][data-device="landscape"] .center{padding:3px;gap:2px}
+.screen[data-layout-v2][data-device="landscape"] .center-logo{font-size:13px}
+.screen[data-layout-v2][data-device="landscape"] .center-status{font-size:10px}
+.screen[data-layout-v2][data-device="landscape"] .center-meta{font-size:8px}
+.screen[data-layout-v2][data-device="portrait"] .game-table{gap:4px;padding:4px}
+.screen[data-layout-v2][data-device="portrait"] .seat{padding:2px;gap:0}
+.screen[data-layout-v2][data-device="portrait"] .seat .seat-h{height:16px;gap:2px}
+.screen[data-layout-v2][data-device="portrait"] .seat .seat-name{font-size:8px;max-width:56px}
+.screen[data-layout-v2][data-device="portrait"] .seat .seat-score{font-size:7px}
+.screen[data-layout-v2][data-device="portrait"] .seat .mini-grid{
+ grid-template-columns:repeat(4,minmax(0,15px));grid-auto-rows:18px;gap:1px;margin:1px auto 0;
+}
+.screen[data-layout-v2][data-device="portrait"] .seat .meld{font-size:7px;line-height:10px}
+.screen[data-layout-v2][data-device="portrait"] .seat .seat-river-footer{gap:2px;line-height:11px;font-size:7px}
+.screen[data-layout-v2][data-device="portrait"] .seat .river-expand{font-size:7px;line-height:10px;padding:1px 2px}
+.screen[data-layout-v2][data-device="portrait"] .center{padding:3px;gap:2px;border-radius:6px}
+.screen[data-layout-v2][data-device="portrait"] .center-logo{font-size:15px}
+.screen[data-layout-v2][data-device="portrait"] .center-status{font-size:11px}
+.screen[data-layout-v2][data-device="portrait"] .center-meta{font-size:8px}
+.thumb-layout{height:96px;display:grid!important;gap:3px!important;padding:8px!important;background:#0e4639!important;border:1px solid #527662;border-radius:8px;overflow:hidden;margin-bottom:9px}
+.thumb-layout .tn{border-radius:3px;background:#235d4c;border:1px solid #b2a77f70;min-height:0;min-width:0;display:grid;place-items:center;color:#d5dbaa;font-size:8px}
+.thumb-layout .tn.top{grid-area:top}.thumb-layout .tn.left{grid-area:left}.thumb-layout .tn.right{grid-area:right}.thumb-layout .tn.bottom{grid-area:bottom}.thumb-layout .tn.center{position:relative!important;grid-area:center;left:auto!important;top:auto!important;transform:none!important;width:auto!important;height:auto!important;background:#c3ac69;color:#164030;min-height:0}
+.spatial-key{color:#bce2cd;font-size:11px;font-weight:700;margin:12px 0}
+.screen[data-layout-v2][data-id="01"] .game-table{grid-template-areas:". top ." "left center right" ". bottom .";grid-template-columns:27fr 46fr 27fr;grid-template-rows:27fr 46fr 27fr}
+.thumb-layout[data-layout="01"]{grid-template-areas:". top ." "left center right" ". bottom .";grid-template-columns:27fr 46fr 27fr;grid-template-rows:27fr 46fr 27fr}
+.screen[data-layout-v2][data-id="02"] .game-table{grid-template-areas:"left top right" "left center right" "left bottom right";grid-template-columns:28fr 44fr 28fr;grid-template-rows:28fr 44fr 28fr}
+.thumb-layout[data-layout="02"]{grid-template-areas:"left top right" "left center right" "left bottom right";grid-template-columns:28fr 44fr 28fr;grid-template-rows:28fr 44fr 28fr}
+.screen[data-layout-v2][data-id="03"] .game-table{grid-template-areas:"top top right" "left center right" "left bottom bottom";grid-template-columns:29fr 43fr 28fr;grid-template-rows:34fr 32fr 34fr}
+.thumb-layout[data-layout="03"]{grid-template-areas:"top top right" "left center right" "left bottom bottom";grid-template-columns:29fr 43fr 28fr;grid-template-rows:34fr 32fr 34fr}
+.screen[data-layout-v2][data-id="04"] .game-table{grid-template-areas:"top top top" "left center right" "bottom bottom bottom";grid-template-columns:24fr 52fr 24fr;grid-template-rows:25fr 50fr 25fr}
+.thumb-layout[data-layout="04"]{grid-template-areas:"top top top" "left center right" "bottom bottom bottom";grid-template-columns:24fr 52fr 24fr;grid-template-rows:25fr 50fr 25fr}
+.screen[data-layout-v2][data-id="05"] .game-table{grid-template-areas:"top center center" "left center center" "right bottom bottom";grid-template-columns:25fr 37fr 38fr;grid-template-rows:33fr 34fr 33fr}
+.thumb-layout[data-layout="05"]{grid-template-areas:"top center center" "left center center" "right bottom bottom";grid-template-columns:25fr 37fr 38fr;grid-template-rows:33fr 34fr 33fr}
+.screen[data-layout-v2][data-id="06"] .game-table{grid-template-areas:"left top top" "left center right" "bottom bottom right";grid-template-columns:25fr 45fr 30fr;grid-template-rows:32fr 34fr 34fr}
+.thumb-layout[data-layout="06"]{grid-template-areas:"left top top" "left center right" "bottom bottom right";grid-template-columns:25fr 45fr 30fr;grid-template-rows:32fr 34fr 34fr}
+.screen[data-layout-v2][data-id="07"] .game-table{grid-template-areas:"top left right" "center center center" "bottom bottom bottom";grid-template-columns:33fr 34fr 33fr;grid-template-rows:30fr 42fr 28fr}
+.thumb-layout[data-layout="07"]{grid-template-areas:"top left right" "center center center" "bottom bottom bottom";grid-template-columns:33fr 34fr 33fr;grid-template-rows:30fr 42fr 28fr}
+.screen[data-layout-v2][data-id="08"] .game-table{grid-template-areas:"top top left" "right center left" "right bottom bottom";grid-template-columns:30fr 42fr 28fr;grid-template-rows:31fr 39fr 30fr}
+.thumb-layout[data-layout="08"]{grid-template-areas:"top top left" "right center left" "right bottom bottom";grid-template-columns:30fr 42fr 28fr;grid-template-rows:31fr 39fr 30fr}
+.screen[data-layout-v2][data-id="09"] .game-table{grid-template-areas:"top right right" "top center left" "bottom bottom left";grid-template-columns:27fr 43fr 30fr;grid-template-rows:30fr 38fr 32fr}
+.thumb-layout[data-layout="09"]{grid-template-areas:"top right right" "top center left" "bottom bottom left";grid-template-columns:27fr 43fr 30fr;grid-template-rows:30fr 38fr 32fr}
+.screen[data-layout-v2][data-id="10"] .game-table{grid-template-areas:"top left right" "top left right" "center center center" "bottom bottom bottom";grid-template-columns:34fr 33fr 33fr;grid-template-rows:23fr 23fr 30fr 24%}
+.thumb-layout[data-layout="10"]{grid-template-areas:"top left right" "top left right" "center center center" "bottom bottom bottom";grid-template-columns:34fr 33fr 33fr;grid-template-rows:23fr 23fr 30fr 24%}
+
 </style>
 </head>
 <body>
 <main class="shell">
- <div class="shell-head"><div class="logo">▣ MAHJONG FRIENDS <span style="color:#6e9f88">/ DESIGN LAB</span></div><span class="shell-pill">10 concepts · static simulation · NOT live multiplayer</span></div>
+ <div class="shell-head"><div class="logo">▣ MAHJONG FRIENDS <span style="color:#6e9f88">/ DESIGN LAB</span></div><span class="shell-pill">10 spatial layouts · static simulation · NOT live multiplayer</span></div>
  <h1>为真正好玩的四人麻将，重新设计牌桌。</h1>
- <p class="intro">以现有 Mahjong Friends 的四席、真实牌河、碰杠明牌、Bot、选牌确认和 Practice v1 积分为基础。重点解决「牌河与明牌区域多重滚动、手机横屏溢出、操作层抢空间、文字过小」；切换 10 个视觉方向，并查看桌面 / 手机横屏 / 手机竖屏。</p>
+ <p class="intro">以现有 Mahjong Friends 的四席、真实牌河、碰杠明牌、Bot、选牌确认和 Practice v1 积分为基础。全新 V2 是「10 种独立空间布局」，不是换皮肤：包括双侧长牌河、四角拼板、广播式三家顶栏、整行牌河、移动优先方案。点击下方布局缩略图比较座位、弃牌及中央提示如何分配空间。</p>
  <div class="device-row" role="group" aria-label="预览尺寸"><button type="button" data-device="desktop" aria-pressed="true">桌面 1100×620</button><button type="button" data-device="landscape" aria-pressed="false">手机横屏 844×390</button><button type="button" data-device="portrait" aria-pressed="false">手机竖屏 390×844</button><span class="shell-pill">无嵌套滚动 · 牌河分页查看</span></div>
  <div class="proto-info"><div><div class="proto-title" id="conceptTitle"></div><p class="proto-sub" id="conceptDescription"></p></div><button class="small-action" id="resetPreview" type="button">重置模拟桌面</button></div>
  <div class="prototype-shell"><div class="stage" id="stage"><div class="screen" id="screen" data-device="desktop" data-id="01" aria-label="交互式牌桌视觉原型"></div></div></div>
@@ -81,16 +182,16 @@
 (function(){
 "use strict";
 var schemes=[
- {id:"01",title:"翡翠牌馆 · Emerald Heritage",tag:"传统桌面",desc:"延续现有深绿金色，减少厚重面板；四家对称，操作区独立停靠。最平衡的基础方向。",problem:"牌桌结构优先"},
- {id:"02",title:"午夜街机 · Arcade Neon",tag:"轻电竞",desc:"蓝绿霓虹、高对比行动提示；顶部与底部加宽牌河，适合快速识别回合与打出牌。",problem:"强调当前玩家"},
- {id:"03",title:"青花雅集 · Porcelain Blue",tag:"明亮清晰",desc:"青瓷白底与蓝色视觉层次，减少深色面板造成的拥挤感，适合长时间玩牌。",problem:"降低阅读负担"},
- {id:"04",title:"无扰桌面 · Minimal Focus",tag:"极简",desc:"去掉中央装饰、使用极轻分隔与极少状态数字；最适合怕花眼、重视手牌的人。",problem:"消除视觉噪声"},
- {id:"05",title:"好友客厅 · Social Lounge",tag:"温暖社交",desc:"柔和奶油色、圆形头像与轻松的好友座位卡，让真人/机器人身份更加明显。",problem:"突出朋友一起玩"},
- {id:"06",title:"战术信息台 · Tactical HUD",tag:"高密度",desc:"近黑底、矩形仪表化状态栏；显示牌墙、回合、积分但不会压缩手牌区。",problem:"熟练玩家效率"},
- {id:"07",title:"木纹牌桌 · Classic Teak",tag:"实体质感",desc:"深木边框、毛毡桌面和纸牌材质感，复刻现实打麻将的气氛。",problem:"真实麻将氛围"},
- {id:"08",title:"花园茶室 · Botanical Calm",tag:"轻快治愈",desc:"浅绿色与大圆角，柔和呈现动物和花牌；适合家庭及轻度玩家。",problem:"舒适与包容性"},
- {id:"09",title:"粉紫同乐 · Social Pop",tag:"明快活泼",desc:"粉紫珊瑚色、聚焦轮到谁与好友状态；可以延伸成个性化桌布/皮肤。",problem:"社交个性化"},
- {id:"10",title:"竞技紧凑 · Compact Pro",tag:"推荐优先验证",desc:"最大化牌面与可点击区域，信息密度高但层级克制；优先为 844×390 横屏做尺寸约束与响应式布局。",problem:"移动端实战效率"}
+ {id:"01",title:"十字牌桌 · Cross Table",tag:"中心十字",desc:"传统四座环绕中央回合状态，四块专属弃牌格互不挤占",problem:"桌面认知最直觉"},
+ {id:"02",title:"双侧牌河 · Side Rails",tag:"长牌河",desc:"西位和东位改成全高长牌河，上下位居中，丢弃牌更易纵向阅读",problem:"弃牌数量多"},
+ {id:"03",title:"斜向四象 · Diagonal Quadrants",tag:"不对称网格",desc:"四家以斜向分区错开，中央状态置于十字连接处",problem:"减少面板对撞"},
+ {id:"04",title:"三段式 · Full-Width Bands",tag:"三段式",desc:"顶部和底部各占一整行，中间左右玩家夹着状态，不靠缩小弃牌格来适配",problem:"横屏更自然"},
+ {id:"05",title:"左侧三家 · Spectator Rail",tag:"大桌布",desc:"三位对手沿左侧与下缘布置，把最大的核心区域留给公共牌面",problem:"突出桌面整体"},
+ {id:"06",title:"对角视野 · Diagonal Focus",tag:"交错对角",desc:"对手区域沿对角线错位，让吃碰杠及弃牌摘要有独立矩形空间",problem:"避免四角拥挤"},
+ {id:"07",title:"竞技直播 · Broadcast Board",tag:"上方三家",desc:"三个对手在上方并排，公共桌面在中间，我的操作在下方",problem:"直播与手机横屏"},
+ {id:"08",title:"大屏 L 形 · L-Board",tag:"L 型区块",desc:"两组长牌河沿侧边构成 L 型，集中展示对手弃牌且保留中心状态",problem:"桌面宽屏"},
+ {id:"09",title:"错层拼板 · Mosaic",tag:"拼板错层",desc:"玩家格采用大小交错的拼板结构，中央状态是独立面板",problem:"密集信息依然分区"},
+ {id:"10",title:"移动优先 · Mobile Pro",tag:"三对手顶栏",desc:"三家对手并列成顶栏，下方给中央动作与手牌最多空间",problem:"优先优化 844×390"}
 ];
 var labels=["一萬","二萬","三萬","四萬","五萬","六萬","七萬","八萬","九萬","一筒","二筒","三筒","四筒","五筒","六筒","七筒","八筒","九筒","一索","二索","三索","四索","五索","六索","東","南","西","北","發","白","飛"];
 var hand=["一萬","二萬","三萬","二筒","三筒","四筒","五筒","七筒","八筒","九筒","東","東","發","飛"];
@@ -136,7 +237,7 @@ function fitSeatContents(){
   });
 }
 function render(){
- var scheme=schemes[current];screen.dataset.id=scheme.id;screen.dataset.device=device;
+ var scheme=schemes[current];screen.dataset.id=scheme.id;screen.dataset.device=device;screen.dataset.layoutV2="1";
  document.getElementById("conceptTitle").textContent=(current+1)+"/10 · "+scheme.title;
  document.getElementById("conceptDescription").textContent=scheme.desc+" · "+scheme.problem;
  var seatHtml=players.map(seatMarkup).join("");
@@ -183,7 +284,10 @@ function scale(){
 }
 function buildCards(){
  cbox.innerHTML=schemes.map(function(x,i){
- return '<button class="concept" type="button" data-concept="'+i+'" aria-pressed="'+(i===current)+'"><div class="thumb" style="--bg:'+({"01":"#063d32","02":"#091428","03":"#e6f0f4","04":"#f5f3eb","05":"#fff3e6","06":"#101c22","07":"#2f261d","08":"#d6ebd9","09":"#301c37","10":"#071f2a"})[x.id]+';--felt:'+({"01":"#136047","02":"#112942","03":"#d4e6ec","04":"#eeece3","05":"#e8cdb5","06":"#182d34","07":"#23543f","08":"#b9dcc3","09":"#452750","10":"#113848"})[x.id]+';--card:'+({"01":"#134436","02":"#111f39","03":"#f9fefe","04":"#fffdfa","05":"#fffdf9","06":"#16262d","07":"#4a3726","08":"#f3fcf0","09":"#4c3154","10":"#102d3d"})[x.id]+';--accent:'+({"01":"#f7d68a","02":"#4fe4ce","03":"#1b6d9f","04":"#3b8067","05":"#b96750","06":"#ffab61","07":"#f1c787","08":"#337e59","09":"#ffabc8","10":"#8becff"})[x.id]+';--border:#ffffff55"><div class="tt ta"></div><div class="tt tl"></div><div class="tt tr"></div><div class="tt tb"></div><div class="tc"></div><div class="td"></div></div><span class="concept-id">DIRECTION '+x.id+' · '+x.tag+'</span><strong>'+x.title.split(" · ")[0]+'</strong><small>'+x.problem+'</small></button>'
+  return '<button class="concept" type="button" data-concept="'+i+'" aria-pressed="'+(i===current)+'">'
+  +'<div class="thumb-layout" data-layout="'+x.id+'" aria-hidden="true">'
+  +'<div class="tn top">北</div><div class="tn left">西</div><div class="tn right">东</div><div class="tn bottom">南</div><div class="tn center">牌桌</div></div>'
+  +'<span class="concept-id">LAYOUT '+x.id+' · '+x.tag+'</span><strong>'+x.title.split(" · ")[0]+'</strong><small>'+x.problem+'</small></button>';
  }).join("");
 }
 cbox.addEventListener("click",function(e){var btn=e.target.closest("[data-concept]");if(!btn)return;current=Number(btn.dataset.concept);openRiver=-1;toast="";render();});
