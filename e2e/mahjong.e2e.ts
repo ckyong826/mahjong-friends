@@ -111,8 +111,12 @@ test("four real browsers can invite, ready, play one whole round and restart",as
     await host.locator(".mj-hand button").first().click();
     await host.getByRole("button",{name:/打出所选牌/}).click();
     await expect(host.locator(".mj-seat-bottom .mj-river .mj-tile")).toHaveCount(1);
+    await expect(host.locator(".mj-seat-bottom .mj-river-line[data-line='1'] .mj-tile")).toHaveCount(1);
+    await expect(host.locator(".mj-seat-bottom .mj-river-line .mj-tile-latest")).toHaveCount(1);
     for(const page of pages) {
       await expect(page.locator('[aria-label="东家 的弃牌区"] .mj-river .mj-tile')).toHaveCount(1);
+      await expect(page.locator('[aria-label="东家 的弃牌区"] .mj-river-line[data-line="1"]')).toHaveCount(1);
+      await expect(page.locator(".mj-river[data-seat]")).toHaveCount(4);
     }
 
     // A separate verified socket for each context plays legal discards/passes
