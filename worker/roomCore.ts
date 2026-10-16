@@ -41,6 +41,7 @@ export const DEFAULT_RULES: RoomRules = {
 export function validateNickname(input: unknown): string {
   if (typeof input !== "string") throw new RoomError(400, "请输入昵称");
   const name = input.trim();
+  // eslint-disable-next-line no-control-regex -- intentionally strips control chars
   if (!name || [...name].length > 20 || /[\x00-\x1F\x7F]/.test(name)) {
     throw new RoomError(400, "昵称长度须为 1–20 字，不能包含控制字符");
   }
