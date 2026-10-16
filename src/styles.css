@@ -190,3 +190,35 @@ button.mj-tile-selected{transform:translateY(-10px);outline:3px solid #f8d67f;ou
 .bot-fill-panel small{display:block;color:#b9dbca;font-size:11px;line-height:1.6;margin:10px 0 0}
 .lobby-bot-seat{border:1px solid #d3af6c;background:#365541}
 .lobby-bot-seat strong{color:#ffe1a1}
+
+/* v2-02: original reproducible Mahjong assets — safe across all tile ranks */
+.mj-tile{background:linear-gradient(150deg,#fffdf3 0%,#f8f1df 75%,#d8d6c3 100%);border:1px solid #e4d8b9;border-right-color:#afa88c;border-bottom:5px solid #4c8c77;box-shadow:inset 1px 1px 0 #fff,1px 2px 0 #154c41,0 3px 5px #001b174b;overflow:visible}
+.mj-tile-mini{border-bottom-width:3px}
+.mj-tile .mj-semantic-face{display:grid;place-items:center;position:relative;flex:none;width:100%;height:100%;line-height:1}
+.mj-face-svg{display:block;width:100%;height:100%;overflow:visible}
+.mj-face-characters{grid-template-rows:57% 43%;font-family:"Noto Serif SC","Songti SC","STSong",serif;font-weight:900;text-align:center}
+.mj-character-number{display:grid;place-items:center;width:100%;height:100%;font-size:clamp(17px,2.8vw,30px);color:#1f2c39}
+.mj-character-suit{display:grid;place-items:center;width:100%;height:100%;font-size:clamp(13px,2vw,20px);color:#b23d32}
+.mj-face-wind{font-size:clamp(22px,3vw,33px);font-family:"Noto Serif SC",serif;font-weight:900;color:#1f3147;text-shadow:0 1px 0 #fff}
+.mj-face-dragon-red,.mj-face-dragon-green{font-family:"Noto Serif SC",serif;font-weight:900;font-size:clamp(25px,3vw,35px)}
+.mj-face-dragon-red{color:#b43d33}.mj-face-dragon-green{color:#187b5d}
+.mj-face-white{padding:10%;box-sizing:border-box}
+.mj-white-dragon-frame{display:grid;place-items:center;width:80%;height:76%;border:3px double #2d5f91;color:#2b5278;box-shadow:inset 0 0 0 2px #d0e3e9;border-radius:2px;font-family:"Noto Serif SC",serif;font-weight:900;font-size:clamp(10px,1.7vw,18px)}
+.mj-face-bonus,.mj-face-animal{font-family:"Noto Serif SC",serif;font-weight:900;overflow:hidden}
+.mj-bonus-sigil{position:absolute;inset:10% auto auto 8%;font-size:clamp(8px,1vw,11px);color:#d99072;opacity:.8}
+.mj-bonus-character{font-size:clamp(21px,2.8vw,30px);color:#b77849}
+.mj-face-animal .mj-bonus-character{color:#74622e}
+.mj-face-fei{width:85%!important;height:85%!important;border:2px solid #dfb868;border-radius:2px;box-shadow:inset 0 0 0 2px #fff7d9,0 0 0 1px #fff9ed;background:linear-gradient(130deg,#fffdf4,#f6ecca)!important}
+.mj-fei{background:linear-gradient(160deg,#fff9e8,#e6d9ad);border-color:#edc968;border-bottom-color:#5d9568}
+.mj-tile-mini .mj-character-number{font-size:clamp(8px,1.4vw,15px)}
+.mj-tile-mini .mj-character-suit{font-size:clamp(7px,1vw,11px)}
+.mj-tile-mini .mj-face-wind,.mj-tile-mini .mj-face-dragon-red,.mj-tile-mini .mj-face-dragon-green,.mj-tile-mini .mj-bonus-character{font-size:clamp(11px,1.4vw,16px)}
+.mj-tile-mini .mj-white-dragon-frame{border-width:1px;font-size:8px}
+.mj-tile-mini .mj-bonus-sigil{display:none}
+.mj-tile-mini .mj-face-fei{border-width:1px;box-shadow:inset 0 0 0 1px #fff7d9}
+.mj-back{background:repeating-linear-gradient(125deg,transparent 0,transparent 5px,#79b8a726 5px,#79b8a726 8px),linear-gradient(160deg,#397f6d,#155445);border-color:#b8cfbc;box-shadow:inset 0 0 0 1px #0f5647,1px 2px 3px #061f1892}
+.mj-action{border-radius:10px;background:linear-gradient(180deg,#337e69,#154b3c);border:1px solid #c9b17b;box-shadow:inset 0 1px 0 #ffffff45,0 3px 6px #0b272167;color:#fdf6e9;text-shadow:0 1px 1px #071c16}
+.mj-action-primary{background:linear-gradient(180deg,#f6d992,#c99745);color:#264036;text-shadow:none}
+.mj-action-win{background:linear-gradient(180deg,#ed8d67,#b5423b);color:#fff}
+.mj-wind{background:linear-gradient(140deg,#faeed5,#d5b16a);color:#28503e;border:1px solid #f8e6bc;box-shadow:0 1px 4px #09271e}
+@media(max-width:660px){.mj-hand .mj-character-number{font-size:20px}.mj-hand .mj-character-suit{font-size:12px}.mj-hand .mj-face-wind,.mj-hand .mj-face-dragon-red,.mj-hand .mj-face-dragon-green,.mj-hand .mj-bonus-character{font-size:22px}}
