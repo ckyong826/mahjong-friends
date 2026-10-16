@@ -5,6 +5,12 @@ on:
     types: [completed]
     branches: [main]
   workflow_dispatch:
+    inputs:
+      run_room_probe:
+        description: 'After deploy, create one disposable QA room and validate WebSocket'
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: mahjong-friends-cloudflare-production
@@ -45,6 +51,16 @@ jobs:
       - name: Deploy React frontend and Durable Object Worker
         if: steps.check.outputs.ready == 'true'
         run: npm run deploy
+      - name: Read-only deployed health and frontend smoke
+        if: steps.check.outputs.ready == 'true'
+        env:
+          MAHJONG_PRODUCTION_URL: ${{ vars.MAHJONG_PRODUCTION_URL || 'https://mahjong-friends.xinkaiya13826.workers.dev' }}
+        run: npm run smoke:production
+      - name: Optional authenticated live room and WebSocket probe
+        if: steps.check.outputs.ready == 'true' && github.event_name == 'workflow_dispatch' && inputs.run_room_probe == true
+        env:
+          MAHJONG_PRODUCTION_URL: ${{ vars.MAHJONG_PRODUCTION_URL || 'https://mahjong-friends.xinkaiya13826.workers.dev' }}
+        run: npm run smoke:production -- --room-probe
       - name: Production deployment status
         if: steps.check.outputs.ready == 'true'
-        run: echo 'Cloudflare Wrangler deploy completed. Validate the deployed workers.dev URL and real WebSockets before calling this production-verified.' >> "$GITHUB_STEP_SUMMARY"
+        run: echo 'Wrangler deployment and read-only live smoke passed. Authenticated multiplayer/WebSocket remain unverified unless optional room probe also ran.' >> "$GITHUB_STEP_SUMMARY"
