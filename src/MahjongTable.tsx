@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { Tile } from "./shared/tiles";
 import TileFaceArt from "./game/TileFaceArt";
 import type { PlayerGameView, PublicPlayerView } from "./game/engine";
@@ -99,6 +99,13 @@ function Seat({position,player,view,active,latest,score,windByPlayer}:{
   windByPlayer:Record<string,string>;
 }) {
   const newest=latest?.fromPlayerId===player.id?latest.tile.id:null;
+  const riverPanel=useRef<HTMLDivElement>(null);
+  // A long river scrolls within its own seat, so the latest server discard is
+  // visible without moving the whole game page or altering tile ordering.
+  useEffect(()=>{
+    const panel=riverPanel.current;
+    if(panel&&view.discards.length>0)panel.scrollTop=panel.scrollHeight;
+  },[view.discards.length,view.discards.at(-1)?.id]);
   return <section className={"mj-seat mj-seat-"+position+(active?" mj-seat-turn":"")}
       aria-label={player.nickname+" 的弃牌区"}>
     <div className="mj-seat-header">
@@ -110,7 +117,7 @@ function Seat({position,player,view,active,latest,score,windByPlayer}:{
       {active&&<span className="mj-turn-pill">行动中</span>}
     </div>
     {position!=="bottom"&&<TileBack count={view.concealedCount} side={position}/>}
-    <div className="mj-discard-panel">
+    <div className="mj-discard-panel" ref={riverPanel}>
       <div className="mj-discard-title">弃牌 <span>{view.discards.length}</span></div>
       <div className="mj-river" data-seat={position}
         aria-label={player.nickname+" 依时间顺序打出的牌"}>
