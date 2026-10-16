@@ -85,4 +85,24 @@ describe("rendered Mahjong tabletop",()=>{
     expect(html).toContain(">过</button>");
     expect(html).not.toContain("自摸胡牌");
   });
+  it("shows recent chronological rivers while preserving full history access",()=>{
+    const expanded:PlayerGameView={
+      ...game,
+      players:game.players.map((player,i)=>({
+        ...player,
+        discards:Array.from({length:25},(_,n)=>f("history-"+i+"-"+n,{
+          family:"suit",suit:"dots",rank:(n%9+1) as 1|2|3|4|5|6|7|8|9
+        }))
+      })),
+      lastDiscard:null
+    };
+    const html=draw(expanded);
+    expect(html).toContain("mj-central-discard-stage");
+    expect((html.match(/class="mj-river-line"/g)??[])).toHaveLength(8);
+    expect(html).toContain("较早 +18");
+    expect((html.match(/全部弃牌/g)??[])).toHaveLength(4);
+    expect((html.match(/mj-public-open/g)??[])).toHaveLength(4);
+    expect(html).not.toContain("mj-history-dialog");
+  });
+
 });
