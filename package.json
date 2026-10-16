@@ -11,7 +11,7 @@
     "test:watch": "vitest",
     "deploy": "npm run build && wrangler deploy",
     "test:e2e": "playwright test",
-    "test:smoke": "node --test scripts/smoke-production.test.mjs",
+    "test:smoke": "node --test scripts/smoke-production.check.mjs",
     "smoke:production": "node scripts/smoke-production.mjs"
   },
   "dependencies": {
