@@ -6,6 +6,7 @@ test("keyboard and touch-safe tile selection never auto-discards, landscape targ
   await page.goto("/");
   await page.getByRole("textbox",{name:"你的昵称"}).fill("Action Tester");
   await page.getByRole("button",{name:/创建私人房间/}).click();
+  await expect(page).toHaveURL(/\\/room\\/[A-HJ-NP-Z2-9]{6}$/);
   const code=new URL(page.url()).pathname.split("/").at(-1)!;
   await page.getByRole("button",{name:/补满练习机器人/}).click();
   await page.getByRole("button",{name:"我准备好了"}).click();
