@@ -312,7 +312,8 @@ html:has(.mj-game),body:has(.mj-game){height:100%;overflow:hidden}
 }
 @media(max-height:540px) and (orientation:landscape){
   .room-lobby:has(.mj-game){padding:2px 5px}
-  .mj-game{grid-template-rows:30px 19px 0 minmax(0,1fr) 94px;gap:2px}
+  /* Score strip is display:none; four visible grid children require four tracks. */
+  .mj-game{grid-template-rows:30px 19px minmax(0,1fr) 94px;gap:2px}
   .mj-topbar{padding:0 4px}
   .mj-topbar h2{font-size:16px}
   .mj-eyebrow{display:none}
