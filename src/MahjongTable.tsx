@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import type { Tile } from "./shared/tiles";
 import TileFaceArt from "./game/TileFaceArt";
+import GameHelp from "./game/GameHelp";
+import {useGameAudio} from "./game/useGameAudio";
 import {tableTurnFeedback} from "./game/turnFeedback";
 import type { PlayerGameView, PublicPlayerView } from "./game/engine";
 import type { PlayerPublicInfo, RoomPublicView } from "./shared/room";
@@ -297,6 +299,10 @@ export default function MahjongTable({
   isOwner=false,lobbyBusy=false,onReady,onNextRound
 }:MahjongTableProps) {
   const [selectedId,setSelectedId]=useState<string|null>(null);
+  const [helpOpen,setHelpOpen]=useState(false);
+  const helpButtonRef=useRef<HTMLButtonElement>(null);
+  const audio=useGameAudio(game);
+  const closeHelp=()=>{setHelpOpen(false);requestAnimationFrame(()=>helpButtonRef.current?.focus());};
   const handButtons=useRef(new Map<string,HTMLButtonElement>());
   const resultsRef=useRef<HTMLDivElement>(null);
   useEffect(()=>{
@@ -367,12 +373,21 @@ export default function MahjongTable({
   };
 
   return <div className="mj-game" aria-label="四人实时麻将桌">
+    {helpOpen&&<GameHelp onClose={closeHelp}/>}
     <div className="mj-topbar">
       <div>
         <p className="mj-eyebrow">MAHJONG FRIENDS · 私人牌局</p>
         <h2>好友麻将 <span className="mj-room-code">{room.code}</span></h2>
       </div>
       <div className="mj-top-actions">
+        <button ref={helpButtonRef} type="button" className="mj-help-open"
+          aria-label="玩法与算番说明" title="玩法与练习番数"
+          onClick={()=>setHelpOpen(true)}>?</button>
+        <button type="button" className="mj-audio-toggle"
+          aria-pressed={audio.enabled} onClick={audio.toggle}
+          title="启用后打牌有牌声，吃碰杠尝试使用系统中文女声">
+          {audio.enabled?"🔊 音效":"🔇 音效"}
+        </button>
         <span className={"mj-connection mj-connection-"+connection} role="status">
           <span className="mj-connection-dot"/>
           {connection==="connected"?"实时联机":connection==="connecting"?"连接中":"断线重连"}
