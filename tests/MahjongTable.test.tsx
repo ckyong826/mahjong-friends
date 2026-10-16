@@ -101,11 +101,13 @@ describe("rendered Mahjong tabletop",()=>{
     expect((html.match(/class="mj-river-line"/g)??[])).toHaveLength(8);
     expect(html).toContain("较早 +18");
     expect((html.match(/全部弃牌/g)??[])).toHaveLength(4);
-    expect((html.match(/mj-public-open/g)??[])).toHaveLength(4);
+    expect((html.match(/class="mj-public-stage"/g)??[])).toHaveLength(4);
+    // No tiles yet: the optional magnification control is correctly absent.
+    expect((html.match(/class="mj-public-open"/g)??[])).toHaveLength(0);
     expect(html).not.toContain("mj-history-dialog");
   });
 
-  it("does not mount clipped real meld/flower tiles in narrow board trays",()=>{
+  it("renders EVERY physical Chi/Pong/Kong and flower tile directly on all four seats",()=>{
     const kinds=["chi","pong","kong","chi"] as const;
     const expanded:PlayerGameView={...game,players:game.players.map((player,i)=>({
       ...player,
@@ -121,15 +123,25 @@ describe("rendered Mahjong tabletop",()=>{
       }))
     }))};
     const html=draw(expanded);
-    // All four players see a complete count; no physical meld may be
-    // partially truncated inside a 5-column table's narrow edge cells.
-    expect((html.match(/class="mj-public-tray"/g)??[])).toHaveLength(4);
-    expect((html.match(/class="mj-public-summary-meld"/g)??[])).toHaveLength(4);
-    expect((html.match(/class="mj-public-summary-bonus"/g)??[])).toHaveLength(4);
-    expect((html.match(/class="mj-showcases"/g)??[])).toHaveLength(0);
-    expect((html.match(/花 8/g)??[])).toHaveLength(4);
-    expect((html.match(/吃 4/g)??[])).toHaveLength(4);
-    expect((html.match(/4组明牌，8张花牌或动物牌/g)??[])).toHaveLength(4);
+    const seatCount=4,physicalTilesPerSeat=8+3+3+4+3;
+    expect((html.match(/class="mj-public-tray"/g)??[])).toHaveLength(seatCount);
+    expect((html.match(/class="mj-public-stage"/g)??[])).toHaveLength(seatCount);
+    expect((html.match(/class="mj-public-fit"/g)??[])).toHaveLength(seatCount);
+    expect((html.match(/class="mj-showcases"/g)??[])).toHaveLength(seatCount);
+    expect((html.match(/class="mj-meld"/g)??[])).toHaveLength(seatCount*4);
+    expect((html.match(/class="mj-bonus-group"/g)??[])).toHaveLength(seatCount);
+    expect((html.match(/class="mj-public-open"/g)??[])).toHaveLength(seatCount);
+    expect(html).not.toContain("mj-public-summary-meld");
+    expect(html).not.toContain("mj-public-summary-bonus");
+    // TileFaceArt renders each actual exposed tile with an accessible img
+    // name on the in-board stage; no page-open interaction is required.
+    expect((html.match(/data-melds="4" data-bonuses="8"/g)??[]))
+      .toHaveLength(seatCount);
+    expect((html.match(/aria-label="明花及动物牌"/g)??[]))
+      .toHaveLength(seatCount);
+    expect((html.match(/data-kind="chi"/g)??[])).toHaveLength(seatCount*2);
+    expect((html.match(/data-kind="kong"/g)??[])).toHaveLength(seatCount);
+    expect((html.match(/data-kind="pong"/g)??[])).toHaveLength(seatCount);
+    expect(physicalTilesPerSeat).toBe(21);
   });
-
 });

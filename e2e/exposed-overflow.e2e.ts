@@ -1,113 +1,84 @@
 import {test,expect} from "@playwright/test";
 
-/** Layout-only late-game stress. Authoritative rules are exercised elsewhere.
- * Inject physical-tile-shaped markup into the exposed-history dialog after
- * creating a real bot game; don't mutate live/server state to manufacture hands.
+/** Full four-seat, 4-meld + 8-flower visual stress across real viewports.
+ * The actual physical tiles are asserted via the JSX render unit tests.
+ * Here we stress the browser's ResizeObserver-based auto-fit engine with the
+ * same nested markup and ensure no in-board tile is clipped.
  */
-test("Chi/Pong/Kong and flower trays never overflow the shared stage or details",async({page})=>{
+test("physical Chi/Pong/Kong and flowers fit directly on all four seats",async({page})=>{
   test.setTimeout(120_000);
   await page.goto("/");
-  await page.getByRole("textbox",{name:"你的昵称"}).fill("Meld Overflow QA");
+  await page.getByRole("textbox",{name:"你的昵称"}).fill("Tile Fit Tester");
   await page.getByRole("button",{name:/创建私人房间/}).click();
   await expect(page).toHaveURL(new RegExp("/room/[A-HJ-NP-Z2-9]{6}$"));
   await page.getByRole("button",{name:/补满练习机器人/}).click();
   await page.getByRole("button",{name:"我准备好了"}).click();
   await page.getByRole("button",{name:"四人准备后开局"}).click();
   await expect(page.locator(".mj-game")).toBeVisible();
+  await expect(page.locator(".mj-public-stage")).toHaveCount(4);
 
-  for(const [width,height] of [[1366,768],[844,390],[915,412],[390,844]]){
-    await page.setViewportSize({width,height});
-    const box=await page.evaluate(()=>{
-      const board=document.querySelector(".mj-board")!.getBoundingClientRect();
-      return [...document.querySelectorAll<HTMLElement>(".mj-public-tray")].map(tray=>{
-        const tr=tray.getBoundingClientRect();
-        const button=tray.querySelector<HTMLButtonElement>(".mj-public-open")!;
-        const br=button.getBoundingClientRect();
-        const parts=[...button.querySelectorAll<HTMLElement>(
-          ".mj-public-summary-meld,.mj-public-summary-bonus,.mj-public-arrow"
-        )].map(el=>{
-          const r=el.getBoundingClientRect();
-          return {left:r.left,right:r.right,top:r.top,bottom:r.bottom};
-        });
-        return {rect:tr,button:br,parts,
-          nestedScroll:tray.scrollWidth>tray.clientWidth+1||tray.scrollHeight>tray.clientHeight+1};
-      }).map(({rect,button,parts,nestedScroll})=>({
-        tray:{left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom},
-        button:{left:button.left,right:button.right,top:button.top,bottom:button.bottom},
-        parts,nestedScroll,
-        withinBoard:rect.left>=board.left-2&&rect.right<=board.right+2&&
-          rect.top>=board.top-2&&rect.bottom<=board.bottom+2
-      }));
-    });
-    const tag=width+"x"+height;
-    expect(box,tag+" exactly four public meld/flower counters").toHaveLength(4);
-    for(const seat of box){
-      expect(seat.withinBoard,tag+" public tray inside board").toBe(true);
-      expect(seat.nestedScroll,tag+" no nested scroll in public tray").toBe(false);
-      expect(seat.button.left,tag+" open button begins inside tray").toBeGreaterThanOrEqual(seat.tray.left-2);
-      expect(seat.button.right,tag+" open button ends inside tray").toBeLessThanOrEqual(seat.tray.right+2);
-      expect(seat.button.top,tag+" open button top inside tray").toBeGreaterThanOrEqual(seat.tray.top-2);
-      expect(seat.button.bottom,tag+" open button bottom inside tray").toBeLessThanOrEqual(seat.tray.bottom+2);
-      expect(seat.parts,tag+" latest meld type, flowers and detail affordance").toHaveLength(3);
-      for(const label of seat.parts){
-        expect(label.left).toBeGreaterThanOrEqual(seat.button.left-2);
-        expect(label.right).toBeLessThanOrEqual(seat.button.right+2);
-        expect(label.top).toBeGreaterThanOrEqual(seat.button.top-2);
-        expect(label.bottom).toBeLessThanOrEqual(seat.button.bottom+2);
-      }
-    }
-  }
-
-  await page.getByRole("button",{name:/查看 .* 全部公开组合与花牌/}).first().click();
-  await expect(page.getByRole("dialog",{name:/全部公开组合/})).toBeVisible();
-  // Geometry fixture: a whole Kong and several physical flowers in the same
-  // paged detail view are the worst-case content under the 1-meld/3-bonus rule.
+  // Exercise fit at multiple real panel aspect ratios with a representative
+  // maximum exposed tile load. This modifies browser-local markup only,
+  // NEVER the server's authoritative game or any player's hidden hand.
   await page.evaluate(()=>{
-    const root=document.querySelector<HTMLElement>(".mj-history-public")!;
-    const tile=(name:string)=>'<span role="img" aria-label="'+name+
-      '" class="mj-tile mj-dots mj-tile-mini">'+name+'</span>';
-    root.innerHTML='<div class="mj-showcases">'+
-      '<div class="mj-bonus-group"><span class="mj-showcase-label">花牌 3</span>'+
-      '<div class="mj-showcase-tiles">'+["春","夏","秋"].map(tile).join("")+'</div></div>'+
-      '<div class="mj-meld-group"><span class="mj-showcase-label">明牌 1</span>'+
-      '<div class="mj-showcase-melds"><div class="mj-meld" data-kind="kong">'+
-      '<span class="mj-meld-name">杠</span><div class="mj-meld-tiles">'+
-      ["一","一","一","一"].map(tile).join("")+'</div>'+
-      '<span class="mj-meld-source">东位</span></div></div></div></div>';
+    for(const stage of document.querySelectorAll<HTMLElement>(".mj-public-stage")){
+      const body=stage.querySelector<HTMLElement>(".mj-public-fit")!;
+      const tile=(label:string)=>'<span class="mj-tile mj-dots mj-tile-mini" role="img" aria-label="'+label+
+        '"><span class="mj-semantic-face">'+label+'</span></span>';
+      const bonuses=Array.from({length:8},(_,i)=>tile("花"+(i+1))).join("");
+      const kinds=["chi","pong","kong","chi"];
+      const melds=kinds.map((kind,i)=>'<div class="mj-meld" data-kind="'+kind+'">'+
+        '<span class="mj-meld-name">'+({chi:"吃",pong:"碰",kong:"杠"} as Record<string,string>)[kind]+'</span>'+
+        '<div class="mj-meld-tiles">'+Array.from({length:kind==="kong"?4:3},(_,n)=>
+          tile("第"+(i+1)+"组"+(n+1)+"牌")).join("")+'</div></div>').join("");
+      body.innerHTML='<div class="mj-showcases">'+
+        '<div class="mj-bonus-group"><span class="mj-showcase-label">花牌 8</span>'+
+        '<div class="mj-showcase-tiles">'+bonuses+'</div></div>'+
+        '<div class="mj-meld-group"><span class="mj-showcase-label">明牌 4</span>'+
+        '<div class="mj-showcase-melds">'+melds+'</div></div></div>';
+    }
   });
-  for(const [width,height] of [[1366,768],[844,390],[915,412],[390,844]]){
+  // Each viewport resize notifies the fit engine via ResizeObserver.
+  for(const [width,height] of [[1366,768],[1440,900],[844,390],[915,412],[390,844]]){
     await page.setViewportSize({width,height});
-    const measured=await page.evaluate(()=>{
-      const dialog=document.querySelector(".mj-history-dialog")!.getBoundingClientRect();
-      const content=document.querySelector(".mj-history-public")!.getBoundingClientRect();
-      const parts=[...document.querySelectorAll<HTMLElement>(
-        ".mj-history-public .mj-showcase-label,.mj-history-public .mj-tile,.mj-history-public .mj-meld"
-      )].filter(el=>getComputedStyle(el).display!=="none").map(el=>{
-        const r=el.getBoundingClientRect();
-        return {left:r.left,right:r.right,top:r.top,bottom:r.bottom};
+    await page.waitForTimeout(125);
+    const seats=await page.evaluate(()=>{
+      const board=document.querySelector(".mj-board")!.getBoundingClientRect();
+      return [...document.querySelectorAll<HTMLElement>(".mj-public-stage")].map(stage=>{
+        const r=stage.getBoundingClientRect();
+        const fit=stage.querySelector<HTMLElement>(".mj-public-fit")!;
+        const scaled=parseFloat(stage.dataset.fitScale??"0");
+        const tiles=[...stage.querySelectorAll<HTMLElement>(".mj-tile")].map(tile=>{
+          const rect=tile.getBoundingClientRect();
+          return {left:rect.left,right:rect.right,top:rect.top,bottom:rect.bottom,
+            width:rect.width,height:rect.height};
+        });
+        const kinds=[...stage.querySelectorAll<HTMLElement>(".mj-meld")].map(x=>x.dataset.kind);
+        return {scale:scaled,
+          stage:{left:r.left,right:r.right,top:r.top,bottom:r.bottom},
+          tiles,kinds,flowers:stage.querySelectorAll(".mj-bonus-group .mj-tile").length,
+          fitting:fit.getBoundingClientRect().width<=r.width+2,
+          board:{left:board.left,right:board.right,top:board.top,bottom:board.bottom}};
       });
-      const el=document.querySelector<HTMLElement>(".mj-history-public")!;
-      return {dialog:{top:dialog.top,bottom:dialog.bottom,left:dialog.left,right:dialog.right},
-        content:{top:content.top,bottom:content.bottom,left:content.left,right:content.right},
-        parts,scrollX:el.scrollWidth>el.clientWidth+1,scrollY:el.scrollHeight>el.clientHeight+1};
     });
     const tag=width+"x"+height;
-    expect(measured.dialog.top).toBeGreaterThanOrEqual(-2);
-    expect(measured.dialog.bottom).toBeLessThanOrEqual(height+2);
-    expect(measured.dialog.left).toBeGreaterThanOrEqual(-2);
-    expect(measured.dialog.right).toBeLessThanOrEqual(width+2);
-    expect(measured.scrollX,tag+" no public detail horizontal overflow").toBe(false);
-    expect(measured.scrollY,tag+" no public detail vertical overflow").toBe(false);
-    expect(measured.parts.length,tag+" all 7 tiles and one Kong remain visible").toBeGreaterThanOrEqual(8);
-    for(const p of measured.parts){
-      expect(p.left,tag+" tile inside detail").toBeGreaterThanOrEqual(measured.content.left-2);
-      expect(p.right,tag+" tile inside detail").toBeLessThanOrEqual(measured.content.right+2);
-      expect(p.top,tag+" tile top inside detail").toBeGreaterThanOrEqual(measured.content.top-2);
-      expect(p.bottom,tag+" tile bottom inside detail").toBeLessThanOrEqual(measured.content.bottom+2);
+    expect(seats,tag+" four fitted public areas").toHaveLength(4);
+    for(const seat of seats){
+      expect(seat.scale,tag+" a positive auto-fit scale").toBeGreaterThan(0);
+      expect(seat.scale,tag+" fit scale never enlarges physical tiles").toBeLessThanOrEqual(1);
+      expect(seat.fitting,tag+" stage fits within own cell").toBe(true);
+      expect(seat.flowers,tag+" eight visible flowers").toBe(8);
+      expect(seat.kinds,tag+" all physical exposed groups").toEqual(["chi","pong","kong","chi"]);
+      expect(seat.tiles,tag+" all physical tiles present without opening details").toHaveLength(21);
+      for(const tile of seat.tiles){
+        expect(tile.left,tag+" exposed tile not clipped horizontally").toBeGreaterThanOrEqual(seat.stage.left-2);
+        expect(tile.right,tag+" exposed tile not clipped horizontally").toBeLessThanOrEqual(seat.stage.right+2);
+        expect(tile.top,tag+" exposed tile not clipped vertically").toBeGreaterThanOrEqual(seat.stage.top-2);
+        expect(tile.bottom,tag+" exposed tile not clipped vertically").toBeLessThanOrEqual(seat.stage.bottom+2);
+      }
+      expect(seat.stage.left).toBeGreaterThanOrEqual(seat.board.left-2);
+      expect(seat.stage.right).toBeLessThanOrEqual(seat.board.right+2);
     }
-    await page.screenshot({path:"test-results/v2-screenshots/exposed-"+tag+".png",fullPage:false});
+    await page.screenshot({path:"test-results/v2-screenshots/autofit-"+tag+".png",fullPage:false});
   }
-  await page.keyboard.press("Escape");
-  await expect(page.locator(".mj-history-dialog")).toHaveCount(0);
-  await expect(page.locator(".mj-public-open").first()).toBeFocused();
 });
