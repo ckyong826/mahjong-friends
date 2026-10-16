@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import type { Tile } from "./shared/tiles";
 import TileFaceArt from "./game/TileFaceArt";
 import GameHelp from "./game/GameHelp";
@@ -92,6 +92,58 @@ function DisplayMelds({player,windByPlayer}:{player:PublicPlayerView;windByPlaye
     </div>}
   </div>;
 }
+/**
+ * Draw the ORIGINAL public tiles directly in the seat, never a summary.
+ * A compact 5-column Mahjong layout has very different tray aspect ratios on
+ * desktop, mobile landscape and portrait. Measure the actual cell and try
+ * multiple wrap widths, choosing the largest legible scale that fits BOTH
+ * dimensions. No data is sliced, paginated or hidden in the primary table.
+ */
+function FittedPublicMelds({player,windByPlayer}:{
+  player:PublicPlayerView;windByPlayer:Record<string,string>;
+}) {
+  const stageRef=useRef<HTMLDivElement>(null);
+  const fitRef=useRef<HTMLDivElement>(null);
+  useLayoutEffect(()=>{
+    const stage=stageRef.current,fit=fitRef.current;
+    if(!stage||!fit)return;
+    const layout=()=>{
+      const availableW=stage.clientWidth,availableH=stage.clientHeight;
+      if(availableW<=0||availableH<=0)return;
+      let bestScale=0,bestWidth=availableW,bestW=availableW,bestH=availableH;
+      // Wrapping at the available width is not always optimal for extremely
+      // shallow top/bottom rows. Try wider intrinsic rows and scale down.
+      for(const multiple of [1,1.25,1.5,2,2.5,3,4,5]){
+        const width=Math.max(40,Math.round(availableW*multiple));
+        fit.style.width=width+"px";
+        const naturalW=Math.max(width,fit.scrollWidth);
+        const naturalH=Math.max(1,fit.scrollHeight);
+        const scale=Math.min(1,availableW/naturalW,availableH/naturalH);
+        if(scale>bestScale+0.001){
+          bestScale=scale;bestWidth=width;bestW=naturalW;bestH=naturalH;
+        }
+      }
+      fit.style.width=bestWidth+"px";
+      const x=Math.max(0,(availableW-bestW*bestScale)/2);
+      const y=Math.max(0,(availableH-bestH*bestScale)/2);
+      fit.style.transform="translate("+x+"px,"+y+"px) scale("+bestScale+")";
+      stage.dataset.fitScale=bestScale.toFixed(3);
+    };
+    layout();
+    const observer=new ResizeObserver(layout);
+    observer.observe(stage);
+    return ()=>observer.disconnect();
+  },[player.melds,player.bonuses,windByPlayer]);
+  return <div className="mj-public-stage" ref={stageRef}
+    data-melds={player.melds.length} data-bonuses={player.bonuses.length}
+    aria-label={"桌上公开 "+player.melds.length+" 组明牌及 "+player.bonuses.length+" 张花牌或动物牌"}>
+    <div className="mj-public-fit" ref={fitRef}>
+      <DisplayMelds player={player} windByPlayer={windByPlayer}/>
+      {player.melds.length===0&&player.bonuses.length===0&&
+        <span className="mj-public-empty">尚未公开牌</span>}
+    </div>
+  </div>;
+}
 function Seat({position,player,view,active,latest,score,windByPlayer,dealer,arrivingId}:{
   position:SeatPosition;
   player:PlayerPublicInfo;
@@ -176,21 +228,14 @@ function Seat({position,player,view,active,latest,score,windByPlayer,dealer,arri
           })}
       </div>
     </div>
-    <div className="mj-public-tray" aria-label={player.nickname+" 的公开明牌与花牌概览"}>
-      {/* A side player's physical meld + flowers can be wider than their entire
-          grid cell. Do not render half a Chi or clip a flower. Keep all counts
-          visible on the board, and expose every real tile in the modal. */}
-      <button type="button" className="mj-public-open" onClick={event=>showPanel("public",event.currentTarget)}
-        aria-label={"查看 "+player.nickname+" 全部公开组合与花牌："+
-          view.melds.length+"组明牌，"+view.bonuses.length+"张花牌或动物牌"}>
-        <span className="mj-public-summary-meld" aria-hidden="true">
-          {view.melds.length===0?"明 0":
-            (view.melds.at(-1)?.kind==="chi"?"吃":
-              view.melds.at(-1)?.kind==="pong"?"碰":"杠")+" "+view.melds.length}
-        </span>
-        <span className="mj-public-summary-bonus" aria-hidden="true">花 {view.bonuses.length}</span>
-        <span className="mj-public-arrow" aria-hidden="true">↗</span>
-      </button>
+    <div className="mj-public-tray" aria-label={player.nickname+" 的公开明牌与花牌"}>
+      <FittedPublicMelds player={view} windByPlayer={windByPlayer}/>
+      {/* Magnification is optional: physical exposed tiles are ALREADY
+          present on the live table without clicking this control. */}
+      {(view.melds.length>0||view.bonuses.length>0)&&
+        <button type="button" className="mj-public-open" onClick={event=>showPanel("public",event.currentTarget)}
+          aria-label={"放大查看 "+player.nickname+" 全部公开组合与花牌"}
+          title="放大查看公开牌">⤢</button>}
     </div>
     {openPanel&&<div className="mj-history-backdrop" aria-hidden="true"
       onClick={()=>setOpenPanel(null)}/>}
