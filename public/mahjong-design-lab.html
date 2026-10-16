@@ -141,6 +141,23 @@ function render(){
  document.getElementById("conceptDescription").textContent=scheme.desc+" · "+scheme.problem;
  var seatHtml=players.map(seatMarkup).join("");
  screen.innerHTML='<header class="game-header"><div class="game-brand">麻將友 · MAHJONG FRIENDS<small>PRIVATE ROOM  ·  6K2M9P  ·  PRACTICE V1</small></div><div class="game-top-data"><span>第 <b>02</b> 局</span><span>牌墙 <b>58</b></span><span>补牌 <b>11</b></span><span>实时 <b>●</b></span></div></header><div class="game-table">'+seatHtml+'<div class="center"><span class="center-logo">友</span><span class="center-status">轮到你出牌</span><span class="center-meta">请选择一张牌，再确认 · 最近弃牌：三筒</span></div></div><section class="hand-dock" aria-label="自己的手牌和操作按钮"><div class="hand-area"><div class="hand-label">我的手牌 · 南位 · '+(selected>=0?'已选 '+hand[selected]:'请选牌')+'</div><div class="hand-tiles">'+handMarkup()+'</div></div><div class="dock-actions"><button class="action primary" type="button" data-confirm="1">确认打出</button><button class="action" type="button" data-action="过">过</button><button class="action" type="button" data-action="碰">碰</button></div></section>'+(toast?'<div class="demo-toast" role="status">'+escapeText(toast)+'</div>':'')+overlayMarkup();
+ if(openRiver>=0){
+   // Bind the modal controls directly. The screen-level delegate is for game
+   // tiles, not for a paging event which replaces the modal DOM in-place.
+   screen.querySelectorAll(".detail-tools [data-page]").forEach(function(button){
+     button.addEventListener("click",function(event){
+       event.stopPropagation();
+       var direction=Number(button.dataset.page);
+       page=Math.max(0,Math.min(1,page+direction));
+       render();
+     });
+   });
+   var closeButton=screen.querySelector(".detail-tools [data-close]");
+   if(closeButton)closeButton.addEventListener("click",function(event){
+     event.stopPropagation();
+     openRiver=-1;render();
+   });
+ }
  fitSeatContents();
  cbox.querySelectorAll(".concept").forEach(function(c,i){c.setAttribute("aria-pressed",i===current?"true":"false")});
  scale();
@@ -167,8 +184,7 @@ screen.addEventListener("click",function(e){
  var el=e.target.closest("button");if(!el)return;
  if(el.dataset.tile!==undefined){selected=Number(el.dataset.tile);toast="";render();return;}
  if(el.dataset.river!==undefined){openRiver=Number(el.dataset.river);page=0;toast="";render();return;}
- if(el.dataset.close){openRiver=-1;render();return;}
- if(el.dataset.page!==undefined){page=Math.max(0,Math.min(1,page+Number(el.dataset.page)));render();return;}
+ if(el.dataset.close!==undefined||el.dataset.page!==undefined)return; // handled by dialog controls
  if(el.dataset.confirm){toast=selected>=0?"演示：已选择 "+hand[selected]+"（未连接服务器，未真正打牌）":"请选择一张手牌";render();return;}
  if(el.dataset.action){toast="演示："+el.dataset.action+"（此处仅检视按钮，不执行真实操作）";render();}
 });
