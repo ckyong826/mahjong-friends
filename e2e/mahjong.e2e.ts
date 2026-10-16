@@ -163,8 +163,30 @@ test("four real browsers can invite, ready, play one whole round and restart",as
     expect(finished,"Full physical deck should eventually end a round").toBe(true);
 
     await expect(host.locator(".mj-results")).toBeVisible();
-    await expect(host.locator(".mj-settlement-totals")).toBeVisible();
-    await expect(host.getByText("练习计分，非正式家规")).toBeVisible();
+    const result=host.getByRole("dialog",{name:/胡牌|流局/});
+    await expect(result).toBeVisible();
+    await expect(result).toBeFocused();
+    await expect(host.locator(".mj-settlement-totals > div")).toHaveCount(4);
+    await expect(result.getByText(/练习积分 · 非正式家规/)).toBeVisible();
+    await expect(result.getByRole("heading",{name:"练习计分明细"})).toBeVisible();
+    // The practice round must settle zero-sum. UI must never be mistaken
+    // for an official regional scoring profile.
+    const saved=await readRoom(host,code);
+    const delta=(saved.room as typeof saved.room & {lastSettlement?:{delta:Record<string,number>}}).lastSettlement?.delta;
+    expect(delta,"Server should publish virtual settlement deltas").toBeTruthy();
+    expect(Object.values(delta!).reduce((sum,n)=>sum+n,0)).toBe(0);
+    await host.setViewportSize({width:844,height:390});
+    await expect(result).toBeVisible();
+    const geometry=await host.evaluate(()=>{
+      const dialog=document.querySelector(".mj-results")!.getBoundingClientRect();
+      return {doc:document.documentElement.scrollHeight,win:innerHeight,
+        top:dialog.top,bottom:dialog.bottom};
+    });
+    expect(geometry.doc).toBeLessThanOrEqual(geometry.win+2);
+    expect(geometry.top).toBeGreaterThanOrEqual(-2);
+    expect(geometry.bottom).toBeLessThanOrEqual(geometry.win+2);
+    await host.screenshot({path:"test-results/v2-screenshots/settlement-844x390.png",fullPage:false});
+    await host.setViewportSize({width:1280,height:900});
 
     for(const p of pages)await p.getByRole("button",{name:"准备下一局"}).click();
     await expect(host.getByRole("button",{name:"所有人准备好后开下一局"})).toBeEnabled();

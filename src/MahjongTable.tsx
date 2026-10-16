@@ -168,6 +168,10 @@ export default function MahjongTable({
 }:MahjongTableProps) {
   const [selectedId,setSelectedId]=useState<string|null>(null);
   const handButtons=useRef(new Map<string,HTMLButtonElement>());
+  const resultsRef=useRef<HTMLDivElement>(null);
+  useEffect(()=>{
+    if(game.phase==="ended")resultsRef.current?.focus();
+  },[game.phase,room.roundNumber]);
   const [arrivingId,setArrivingId]=useState<string|null>(null);
   const seenLastDiscard=useRef(game.lastDiscard?.tile.id??null);
   useEffect(()=>{
@@ -304,23 +308,49 @@ export default function MahjongTable({
       <span className="mj-screenreader-status" role="status" aria-live="polite" aria-atomic="true">
         {canDiscard?(selected?"已选择 "+tileAppearance(selected).accessibleName+"，需点击确认打出":"轮到你出牌，请选择一张牌"):"等待行动"}
       </span>
-      {game.phase==="ended"?<div className="mj-results" role="status">
-        <strong>{outcome?.type==="draw"?"本局流局":winner?.nickname+" 胡牌！"}</strong>
+      {game.phase==="ended"?<div className="mj-results" role="dialog" aria-modal="true"
+        aria-labelledby="mj-result-heading" tabIndex={-1} ref={resultsRef}
+        onKeyDown={event=>{
+          // Keep keyboard navigation within the result sheet until the next
+          // round; Escape cannot silently dismiss an unresolved settlement.
+          if(event.key!=="Tab")return;
+          const items=Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>("button:not(:disabled)"));
+          if(!items.length){event.preventDefault();return;}
+          const first=items[0],last=items[items.length-1];
+          if(event.shiftKey&&(document.activeElement===first||document.activeElement===event.currentTarget)){
+            event.preventDefault();last.focus();
+          }else if(!event.shiftKey&&(document.activeElement===last||document.activeElement===event.currentTarget)){
+            event.preventDefault();first.focus();
+          }
+        }}>
+        <div className="mj-results-heading">
+          <span className="mj-results-kicker">第 {room.roundNumber??1} 局 · 牌局结算</span>
+          <h3 id="mj-result-heading">{outcome?.type==="draw"?"本局流局":(winner?.nickname??"玩家")+" 胡牌！"}</h3>
+          <p className="mj-practice-disclaimer">练习积分 · 非正式家规／非官方新马麻将番数</p>
+        </div>
         {room.lastSettlement&&<>
-          <p>第 {room.lastSettlement.roundNumber} 局 · 练习积分模式（不是官方新马麻将番数）</p>
-          <div className="mj-settlement-lines">
-            {room.lastSettlement.lines.map((line,i)=><div key={i}>
-              <span>{line.name}</span><span>+{line.fan} 番</span>
-              <small>{line.detail}</small>
-            </div>)}
-          </div>
-          <div className="mj-settlement-totals">
-            {room.players.map(player=><div key={player.id}>
-              <span>{player.nickname}</span>
-              <strong>{(room.lastSettlement!.delta[player.id]??0)>0?"+":""}{room.lastSettlement!.delta[player.id]??0} 分</strong>
-              <small>累计 {room.lastSettlement!.totals[player.id]??0} 分</small>
-            </div>)}
-          </div>
+          <section className="mj-results-score-section" aria-label="本局和累计虚拟积分">
+            <h4>本局得分与累计积分</h4>
+            <div className="mj-settlement-totals">
+              {room.players.map(player=>{
+                const delta=room.lastSettlement!.delta[player.id]??0;
+                return <div key={player.id} className={delta>0?"mj-score-gain":delta<0?"mj-score-loss":"mj-score-neutral"}>
+                  <span>{player.nickname}</span>
+                  <strong>{delta>0?"+":""}{delta} 分</strong>
+                  <small>累计 {room.lastSettlement!.totals[player.id]??0} 分</small>
+                </div>;
+              })}
+            </div>
+          </section>
+          <section className="mj-results-fan-section" aria-label="练习番数计算明细">
+            <h4>练习计分明细</h4>
+            <div className="mj-settlement-lines">
+              {room.lastSettlement.lines.map((line,i)=><div key={i}>
+                <span>{line.name}</span><span>+{line.fan} 番</span>
+                <small>{line.detail}</small>
+              </div>)}
+            </div>
+          </section>
         </>}
         {room.state==="settlement"&&<div className="mj-next-round">
           <p>下一局准备：{room.players.filter(p=>p.ready).length}/4 人</p>
