@@ -129,7 +129,7 @@ function Seat({position,player,view,active,latest,score,windByPlayer,dealer,arri
       </span>
       <span className="mj-wind">{windText(player.seat)}</span>
       <strong>{player.nickname}</strong>
-      {dealer&&<span className="mj-dealer-pill" title="本局庄家">庄</span>
+      {dealer&&<span className="mj-dealer-pill" title="本局庄家">庄</span>}
       {player.isBot&&<span className="mj-bot-label" title="练习机器人">BOT</span>}
       <span className="mj-seat-score">{score}分</span>
       {position!=="bottom"&&<span className="mj-seat-count">{view.concealedCount}张</span>}
