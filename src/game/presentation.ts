@@ -1,5 +1,25 @@
 import { sameNaturalFace } from "./hand";
 import type { PublicMeldView, PlayerGameView } from "./engine";
+
+/** Keep the actual chronological server discard sequence intact.
+ * A river displays one 6-tile line at a time, like a physical Mahjong table.
+ * NEVER sort by face: claimed tiles are removed from their owner's river
+ * by the server and only the remaining chronological sequence is rendered.
+ */
+export function riverRows<T>(tiles:readonly T[],perLine=6):T[][] {
+  if(!Number.isInteger(perLine)||perLine<1)throw new RangeError("perLine must be positive");
+  const rows:T[][]=[];
+  for(let i=0;i<tiles.length;i+=perLine)rows.push(tiles.slice(i,i+perLine));
+  return rows;
+}
+
+/** Engine appends a claimed discard at meld.tiles[2] for Chi/Pong/Kong.
+ * Added Kong appends its fourth tile at [3]; the original claimed tile stays
+ * at [2]. Concealed Kong has NO publicly identifiable source/face.
+ */
+export function claimedMeldTileIndex(meld:PublicMeldView):number|null {
+  return !meld.concealed&&!!meld.fromPlayerId&&!!meld.tiles&&meld.tiles.length>=3?2:null;
+}
 import type { Tile, TileFace, Wind } from "../shared/tiles";
 
 export type SeatPosition = "bottom" | "right" | "top" | "left";

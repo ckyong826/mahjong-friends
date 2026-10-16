@@ -1,11 +1,11 @@
-import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type { Tile } from "./shared/tiles";
 import TileFaceArt from "./game/TileFaceArt";
 import type { PlayerGameView, PublicPlayerView } from "./game/engine";
 import type { PlayerPublicInfo, RoomPublicView } from "./shared/room";
 import {
   addedKongOptions, concealedKongOptions, matchingHandIds, seatPlayers,
-  sortedConcealedHand, tileAppearance, windText, type SeatPosition
+  riverRows, claimedMeldTileIndex, sortedConcealedHand, tileAppearance, windText, type SeatPosition
 } from "./game/presentation";
 import type { SocketStatus } from "./useRoomSocket";
 
@@ -52,32 +52,60 @@ function TileBack({count,side}: {count:number;side:SeatPosition}) {
     {Array.from({length:count},(_,i)=><span className="mj-back" key={i} aria-hidden="true"/>)}
   </div>;
 }
-function DisplayMelds({player}: {player:PublicPlayerView}) {
-  return <div className="mj-showcases">
+function DisplayMelds({player,windByPlayer}:{player:PublicPlayerView;windByPlayer:Record<string,string>}) {
+  return <div className="mj-showcases" aria-label="明花、动物及公开组合">
     {player.bonuses.length>0&&<div className="mj-bonus-group" aria-label="明花及动物牌">
-      <span className="mj-showcase-label">花 / 动物</span>
-      {player.bonuses.map(tile=><TileCard key={tile.id} tile={tile} mini/>)}
+      <span className="mj-showcase-label">花牌 {player.bonuses.length}</span>
+      <div className="mj-showcase-tiles">
+        {player.bonuses.map(tile=><TileCard key={tile.id} tile={tile} mini/>)}
+      </div>
     </div>}
     {player.melds.length>0&&<div className="mj-meld-group" aria-label="公开的吃碰杠组合">
-      <span className="mj-showcase-label">吃碰杠</span>
-      {player.melds.map((meld,i)=><div key={i} className="mj-meld">
-        <span className="mj-meld-name">{meld.kind==="chi"?"吃":meld.kind==="pong"?"碰":"杠"}</span>
-        {meld.tiles?.map(tile=><TileCard tile={tile} key={tile.id} mini/>) ??
-          Array.from({length:meld.tileCount},(_,j)=><span key={j} className="mj-back mj-back-small" aria-label="暗杠背面"/>)}
-      </div>)}
+      <span className="mj-showcase-label">明牌 {player.melds.length}</span>
+      <div className="mj-showcase-melds">
+        {player.melds.map((meld,i)=>{
+          const claimedIndex=claimedMeldTileIndex(meld);
+          const source=meld.fromPlayerId?windByPlayer[meld.fromPlayerId]??"他家":null;
+          return <div key={i} className="mj-meld" data-kind={meld.kind}
+            data-concealed={meld.concealed?"true":"false"}
+            data-claimed-from={meld.fromPlayerId??undefined}
+            aria-label={(meld.concealed?"暗杠":meld.kind==="chi"?"吃":meld.kind==="pong"?"碰":"明杠")+
+              (source?"，来自"+source+"位的弃牌":"")}>
+            <span className="mj-meld-name">{meld.kind==="chi"?"吃":meld.kind==="pong"?"碰":"杠"}</span>
+            <div className="mj-meld-tiles">
+              {meld.tiles?.map((tile,index)=>claimedIndex===index?
+                <span className="mj-meld-claimed-tile" key={tile.id}
+                  aria-label={"来自"+source+"位的牌"}>
+                  <TileCard tile={tile} mini/>
+                </span>:
+                <TileCard tile={tile} key={tile.id} mini/>) ??
+                Array.from({length:meld.tileCount},(_,j)=>
+                  <span key={j} className="mj-back mj-back-small" aria-label="暗杠背面"/>)}
+            </div>
+            {source&&<span className="mj-meld-source">{source}位</span>}
+          </div>;
+        })}
+      </div>
     </div>}
   </div>;
 }
-
-function Seat({position,player,view,active,latest,score}:{
+function Seat({position,player,view,active,latest,score,windByPlayer}:{
   position:SeatPosition;
   player:PlayerPublicInfo;
   view:PublicPlayerView;
   active:boolean;
   latest:{fromPlayerId:string;tile:Tile}|null;
   score:number;
+  windByPlayer:Record<string,string>;
 }) {
   const newest=latest?.fromPlayerId===player.id?latest.tile.id:null;
+  const riverPanel=useRef<HTMLDivElement>(null);
+  // A long river scrolls within its own seat, so the latest server discard is
+  // visible without moving the whole game page or altering tile ordering.
+  useEffect(()=>{
+    const panel=riverPanel.current;
+    if(panel&&view.discards.length>0)panel.scrollTop=panel.scrollHeight;
+  },[view.discards.length,view.discards.at(-1)?.id]);
   return <section className={"mj-seat mj-seat-"+position+(active?" mj-seat-turn":"")}
       aria-label={player.nickname+" 的弃牌区"}>
     <div className="mj-seat-header">
@@ -89,15 +117,19 @@ function Seat({position,player,view,active,latest,score}:{
       {active&&<span className="mj-turn-pill">行动中</span>}
     </div>
     {position!=="bottom"&&<TileBack count={view.concealedCount} side={position}/>}
-    <div className="mj-discard-panel">
+    <div className="mj-discard-panel" ref={riverPanel}>
       <div className="mj-discard-title">弃牌 <span>{view.discards.length}</span></div>
-      <div className="mj-river" aria-label={player.nickname+" 依时间顺序打出的牌"}>
+      <div className="mj-river" data-seat={position}
+        aria-label={player.nickname+" 依时间顺序打出的牌"}>
         {view.discards.length===0?
           <span className="mj-empty-river">暂无弃牌</span>:
-          view.discards.map(tile=><TileCard mini key={tile.id} tile={tile} latest={tile.id===newest}/>)}
+          riverRows(view.discards).map((line,index)=><div className="mj-river-line"
+            key={index} data-line={index+1} aria-label={"第"+(index+1)+"排，"+line.length+"张"}>
+            {line.map(tile=><TileCard mini key={tile.id} tile={tile} latest={tile.id===newest}/>)}
+          </div>)}
       </div>
     </div>
-    <DisplayMelds player={view}/>
+    <DisplayMelds player={view} windByPlayer={windByPlayer}/>
   </section>;
 }
 
@@ -136,6 +168,7 @@ export default function MahjongTable({
   if(!myPublic||!myPrivate) {
     return <div className="mj-error" role="alert">你目前不在这个牌局中。</div>;
   }
+  const windByPlayer=Object.fromEntries(room.players.map(player=>[player.id,windText(player.seat)]));
   const byPosition=(position:SeatPosition)=>{
     const seat=seats.find(p=>p.position===position);
     if(!seat||!seat.game)return null;
@@ -143,7 +176,7 @@ export default function MahjongTable({
     if(!user)return null;
     return <Seat position={position} player={user} view={seat.game}
       active={game.phase!=="ended"&&game.currentPlayerId===seat.id}
-      latest={game.lastDiscard} score={room.scores?.[user.id]??0}/>;
+      latest={game.lastDiscard} score={room.scores?.[user.id]??0} windByPlayer={windByPlayer}/>;
   };
 
   return <div className="mj-game" aria-label="四人实时麻将桌">
