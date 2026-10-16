@@ -41,3 +41,19 @@ This production smoke test has **not yet been run** because Cloudflare account a
 ## House rules limitation
 
 The current four-player score calculation is labelled *Practice v1*, not an exact new-Malaysian/Malaysian-three-player rule. See [scoring decisions](SCORING_PRACTICE.md). A regional rules acceptance test must be agreed before the UI can claim authentic regional scoring.
+
+## Automated post-deployment smoke (#8)
+
+`.github/workflows/deploy.yml` now runs a **read-only production smoke** immediately after a successful Wrangler deployment, provided both credentials are present. It verifies:
+- `GET /api/health` returns JSON with `status: ok` and the expected app identity.
+- `GET /` returns HTML for Mahjong Friends.
+- `GET /mahjong-design-lab.html` returns the Design Lab HTML.
+- An invalid room code returns **404 JSON**, not a React SPA fallback.
+
+This is an online read-only gateway/assets check; it **does not** prove Durable Object WebSocket gameplay. The production URL defaults to the current project workers.dev address, and can be changed without code using the non-secret repository variable `MAHJONG_PRODUCTION_URL` (bare HTTPS origin). If you change the custom domain or workers.dev subdomain, update the variable before deploying. A failed live smoke makes the deploy workflow fail instead of silently declaring success.
+
+To run it yourself: `npm run smoke:production -- https://mahjong-friends.xinkaiya13826.workers.dev`. It never needs account credentials or logs membership tokens.
+
+For an explicit **write-enabled room/WebSocket handshake** after a deployment, use `Actions → Deploy Cloudflare Worker → Run workflow` on `main` and enable `run_room_probe`, or run `npm run smoke:production -- https://mahjong-friends.xinkaiya13826.workers.dev --room-probe`. This opt-in creates **one** disposable, private test room (rooms currently have no deletion route), confirms unauthenticated snapshot access is denied, checks owner-only snapshot identity, obtains a short-lived ticket and opens an authenticated WebSocket. It is not enabled for every deploy; no token is written to disk or printed.
+
+Offline tests of the production smoke script run in CI via `npm run test:smoke` with fully simulated HTTP and WebSocket calls. Existing Playwright tests include full four-browser gameplay and a dedicated two-human/two-bot privacy + reconnect regression. Until a real post-deploy run is successful, the production verification item in #8 remains open.
