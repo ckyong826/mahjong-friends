@@ -103,7 +103,7 @@ export class MahjongRoom extends DurableObject<Env> {
   }
   private async scheduleBot(room:RoomRecord):Promise<void> {
     // Scheduling is durable even if the Worker hibernates or a player disconnects.
-    if(nextBotAction(room,crypto.randomUUID)) {
+    if(nextBotAction(room,()=>crypto.randomUUID())) {
       await this.ctx.storage.setAlarm(Date.now()+550);
     }
   }
@@ -111,7 +111,7 @@ export class MahjongRoom extends DurableObject<Env> {
     await this.serial(async()=>{
       let room=await this.ctx.storage.get<RoomRecord>("room");
       if(!room)return;
-      const action=nextBotAction(room,crypto.randomUUID);
+      const action=nextBotAction(room,()=>crypto.randomUUID());
       if(!action)return;
       const next=applyGameAction(room.game!,action);
       assertTileConservation(next);
@@ -192,7 +192,7 @@ export class MahjongRoom extends DurableObject<Env> {
         return json({ticket,expiresInSeconds:30},201);
       }
       if(path==="/internal/fill-bots") {
-        room=fillRoomWithBots(room,actor.id,now,crypto.randomUUID);
+        room=fillRoomWithBots(room,actor.id,now,()=>crypto.randomUUID());
       }
       else if(path==="/internal/ready") room=readyRoom(room,actor.id,body.ready as boolean);
       else if(path==="/internal/rules") room=configureRoom(room,actor.id,body.rules as RoomRecord["rules"]);
