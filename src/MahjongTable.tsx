@@ -25,6 +25,9 @@ export interface MahjongTableProps {
   pending:boolean;
   onAction:(action:GameActionDraft)=>void;
   onCopyInvite:()=>void;
+  onTurnNudge?:()=>void;
+  attentionEvent?:{fromPlayerId:string;at:number}|null;
+  nudgeNotice?:string;
   isOwner?:boolean;
   lobbyBusy?:boolean;
   onReady?:()=>void;
@@ -142,7 +145,7 @@ function FittedPublicMelds({player,windByPlayer}:{
     </div>
   </div>;
 }
-function Seat({position,player,view,active,latest,score,windByPlayer,dealer,arrivingId}:{
+function Seat({position,player,view,active,latest,score,windByPlayer,dealer,arrivingId,canNudge,onNudge}:{
   position:SeatPosition;
   player:PlayerPublicInfo;
   view:PublicPlayerView;
@@ -152,6 +155,8 @@ function Seat({position,player,view,active,latest,score,windByPlayer,dealer,arri
   windByPlayer:Record<string,string>;
   dealer:boolean;
   arrivingId:string|null;
+  canNudge?:boolean;
+  onNudge?:()=>void;
 }) {
   const newest=latest?.fromPlayerId===player.id?latest.tile.id:null;
   // Keep the visual table finite. The server's complete chronological river
@@ -203,6 +208,10 @@ function Seat({position,player,view,active,latest,score,windByPlayer,dealer,arri
       <span className="mj-seat-score">{score}分</span>
       {position!=="bottom"&&<span className="mj-seat-count">{view.concealedCount}张</span>}
       {active&&<span className="mj-turn-pill">{player.isBot?"Bot 回合":"行动中"}</span>}
+      {canNudge&&onNudge&&<button type="button" className="mj-turn-nudge"
+        aria-label={"提醒 "+player.nickname+" 轮到出牌"} onClick={onNudge}>
+        ✨ 提醒
+      </button>}
     </div>
     {position!=="bottom"&&<TileBack count={view.concealedCount} side={position}/>}
     <div className="mj-discard-panel">
@@ -294,9 +303,26 @@ const lookup=(hand:readonly Tile[],ids:readonly string[])=>ids.map(id=>{
 
 export default function MahjongTable({
   room,game,viewerId,connection,pending,onAction,onCopyInvite,
+  onTurnNudge,attentionEvent,nudgeNotice,
   isOwner=false,lobbyBusy=false,onReady,onNextRound
 }:MahjongTableProps) {
   const [selectedId,setSelectedId]=useState<string|null>(null);
+  const [nudgeNow,setNudgeNow]=useState(Date.now());
+  const [showAttention,setShowAttention]=useState(false);
+  const [flashEnabled,setFlashEnabled]=useState(()=>{
+    try{return window.localStorage.getItem("mahjong-friends:disable-attention-flash")!=="1";}
+    catch{return true;}
+  });
+  useEffect(()=>{
+    const timer=window.setInterval(()=>setNudgeNow(Date.now()),1000);
+    return ()=>window.clearInterval(timer);
+  },[]);
+  useEffect(()=>{
+    if(!attentionEvent)return;
+    setShowAttention(true);
+    const timer=window.setTimeout(()=>setShowAttention(false),1600);
+    return ()=>window.clearTimeout(timer);
+  },[attentionEvent?.at]);
   const handButtons=useRef(new Map<string,HTMLButtonElement>());
   const resultsRef=useRef<HTMLDivElement>(null);
   useEffect(()=>{
@@ -349,6 +375,11 @@ export default function MahjongTable({
   const ownKongs=useMemo(()=>concealedKongOptions(myHand),[myHand]);
   const upgrades=useMemo(()=>addedKongOptions(myHand,myPrivate?.melds??[]),[myHand,myPrivate?.melds]);
   const feedback=tableTurnFeedback(game,room.players,viewerId);
+  const currentHuman=room.players.find(p=>p.id===game.currentPlayerId&&!p.isBot);
+  const canNudge=!!onTurnNudge&&connection==="connected"&&game.phase==="discard"&&
+    currentHuman!==undefined&&currentHuman.id!==viewerId&&
+    typeof room.turnStartedAt==="number"&&nudgeNow-room.turnStartedAt>=30_000&&
+    (room.lastNudgeAt===undefined||nudgeNow-room.lastNudgeAt>=60_000);
   const outcome=game.outcome;
   const winner=outcome?.winnerId?room.players.find(p=>p.id===outcome.winnerId):null;
   if(!myPublic||!myPrivate) {
@@ -363,10 +394,27 @@ export default function MahjongTable({
     return <Seat position={position} player={user} view={seat.game}
       active={feedback.activePlayerId===seat.id}
       latest={game.lastDiscard} score={room.scores?.[user.id]??0}
-      dealer={game.dealerId===seat.id} arrivingId={arrivingId} windByPlayer={windByPlayer}/>;
+      dealer={game.dealerId===seat.id} arrivingId={arrivingId} windByPlayer={windByPlayer}
+      canNudge={canNudge&&seat.id===game.currentPlayerId}
+      onNudge={onTurnNudge}/>;
   };
 
   return <div className="mj-game" aria-label="四人实时麻将桌">
+    {showAttention&&<div className={
+      "mj-attention-overlay"+(!flashEnabled?" mj-attention-no-flash":"")}
+      role="alert" aria-label="轮到你出牌了">
+      <div className="mj-attention-message">
+        <strong>轮到你出牌了！</strong>
+        <p>其他玩家正在等你</p>
+        {flashEnabled&&<button type="button" onClick={()=>{
+          setFlashEnabled(false);
+          try{window.localStorage.setItem("mahjong-friends:disable-attention-flash","1");}
+          catch{/* local storage may be unavailable */}
+          setShowAttention(false);
+        }}>以后只显示文字，不闪白屏</button>}
+      </div>
+    </div>}
+    {nudgeNotice&&<div className="mj-nudge-toast" role="status">{nudgeNotice}</div>}
     <div className="mj-topbar">
       <div>
         <p className="mj-eyebrow">MAHJONG FRIENDS · 私人牌局</p>
