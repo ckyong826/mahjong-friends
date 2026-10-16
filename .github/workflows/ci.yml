@@ -36,3 +36,10 @@ jobs:
             playwright-report/
             test-results/
           if-no-files-found: ignore
+      - name: Upload v2 viewport screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v2-viewport-screenshots
+          path: test-results/v2-screenshots/
+          if-no-files-found: ignore
