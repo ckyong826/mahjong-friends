@@ -199,17 +199,28 @@ export default function RoomLobby({onPathChanged}:{onPathChanged?:(inRoom:boolea
           <p className="eyebrow">PRIVATE ROOM · 好友等待室</p>
           <h2>房间 <span className="room-number">{room.code}</span></h2>
           <button type="button" className="button-secondary" onClick={share}>复制邀请链接 <span aria-hidden="true">↗</span></button>
-          <p className="room-hint">通过 WhatsApp 分享房间链接，邀请另外 {4-room.players.length} 位朋友。</p>
+          <p className="room-hint">通过 WhatsApp 分享房间链接，邀请另外 {Math.max(0,4-room.players.filter(p=>!p.isBot).length)} 位真人朋友。人数不足也可以用练习机器人补位。</p>
+          {isOwner&&room.state==="waiting"&&room.players.length<4&&
+            <div className="bot-fill-panel">
+              <p>想先试玩？剩余 {4-room.players.length} 个空位可以交给 Bot。</p>
+              <button type="button" className="button-primary" disabled={busy}
+                onClick={()=>{void action("fill-bots");}}>
+                🤖 补满练习机器人（{4-room.players.length} 位）
+              </button>
+              <small>机器人自动准备、出牌、吃碰杠胡；真人在开局前加入会替换一位机器人。</small>
+            </div>}
+          {room.state==="waiting"&&room.players.some(p=>p.isBot)&&
+            <p className="room-hint">🤖 已加入 {room.players.filter(p=>p.isBot).length} 位初级练习机器人。真人可在开局前替换 Bot。</p>}
           <div className="lobby-seats">
             {(["east","south","west","north"] as const).map((seat)=>{
               const player=room.players.find(p=>p.seat===seat);
-              return <div key={seat} className="lobby-seat">
+              return <div key={seat} className={"lobby-seat"+(player?.isBot?" lobby-bot-seat":"")}>
                 <span className="lobby-wind">{seatName(seat)}</span>
                 <strong>{player?.nickname??"空位"}</strong>
-                <small>{player ? (player.ready?"已准备 ✓":"尚未准备"):"等待好友加入"}</small>
+                <small>{player?.isBot?"机器人自动操作":player ? (player.ready?"已准备 ✓":"尚未准备"):"等待好友加入"}</small>
                 {player?.id===room.ownerId&&<span className="owner-tag">房主</span>}
                 {isOwner&&player&&player.id!==self?.id&&room.state==="waiting"&&
-                  <button className="kick-button" disabled={busy} onClick={()=>action("kick",{playerId:player.id})}>移除</button>}
+                  <button className="kick-button" disabled={busy} onClick={()=>action("kick",{playerId:player.id})}>{player.isBot?"移除 Bot":"移除"}</button>}
               </div>;
             })}
           </div>

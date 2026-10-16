@@ -7,6 +7,7 @@ A private, four-player browser Mahjong project: flowers/seasons, optional animal
 ## Features
 
 - Four players join with six-character invite code and separate private reconnect credentials.
+- **Solo practice:** a room owner can click **🤖 补满练习机器人** to fill all empty seats with server-controlled beginner bots, then ready up and play alone. Bots automatically act and resolve legal claims on a durable Cloudflare alarm. Before starting a hand, joining human friends replace bots automatically.
 - Configurable four-player tile inventory with flowers, animals, optional Fei.
 - Server validates legal draw, discard, Chow, Pong, Kong, Hu, pass; prevents cheating and duplicate messages.
 - Cloudflare Durable Object persistence and hibernatable WebSocket sync.

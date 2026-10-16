@@ -181,3 +181,12 @@ button.mj-tile-selected{transform:translateY(-10px);outline:3px solid #f8d67f;ou
 .mj-next-round p{color:#d6d8be;font-size:13px}
 .mj-next-round .mj-action{margin:5px}
 @media(max-width:490px){.mj-score-strip>div{min-width:calc(50% - 7px)}.mj-settlement-totals{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* Solo practice bots: lobby has a single explicit opt-in, no auto-filling. */
+.bot-fill-panel{margin:18px auto;max-width:520px;border:1px solid #d4bf7e;border-radius:12px;padding:14px 17px;background:#244e3d;text-align:center}
+.bot-fill-panel p{font-size:14px;color:#f4dfb4;margin:2px 0 11px}
+.bot-fill-panel button{padding:11px 16px;font-size:14px}
+.bot-fill-panel button:disabled{opacity:.5;cursor:not-allowed}
+.bot-fill-panel small{display:block;color:#b9dbca;font-size:11px;line-height:1.6;margin:10px 0 0}
+.lobby-bot-seat{border:1px solid #d3af6c;background:#365541}
+.lobby-bot-seat strong{color:#ffe1a1}
