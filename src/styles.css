@@ -834,3 +834,53 @@ html:has(.mj-game),body:has(.mj-game){height:100%;overflow:hidden}
   align-content:center;
   overflow:hidden;
 }
+
+
+/* Layout 02 review: dedicate more real estate to the local player HUD.
+ * Previously their name/score squeezed into the narrow corner even though
+ * the game controls already occupied a separate full-width bottom dock. */
+.mj-central-discard-stage .mj-seat-bottom .mj-seat-header{
+  grid-area:5 / 1 / 6 / 3;
+  justify-content:flex-start;
+  padding-inline:6px;
+}
+.mj-central-discard-stage .mj-seat-bottom .mj-public-tray{
+  grid-area:5 / 3 / 6 / 6;
+}
+.mj-central-discard-stage .mj-seat-bottom .mj-seat-header strong{
+  max-width:clamp(52px,12vw,160px);
+  text-overflow:ellipsis;
+  overflow:hidden;
+  white-space:nowrap;
+}
+@media(max-height:540px) and (orientation:landscape){
+  .mj-central-discard-stage .mj-seat-left .mj-seat-header,
+  .mj-central-discard-stage .mj-seat-right .mj-seat-header{
+    display:flex;
+    flex-direction:column;
+    flex-wrap:nowrap;
+    justify-content:center;
+    align-items:center;
+    gap:1px;
+  }
+  .mj-central-discard-stage .mj-seat-left .mj-seat-header .mj-bot-label,
+  .mj-central-discard-stage .mj-seat-right .mj-seat-header .mj-bot-label{
+    display:none;
+  }
+  .mj-central-discard-stage .mj-seat-left .mj-seat-header strong,
+  .mj-central-discard-stage .mj-seat-right .mj-seat-header strong{
+    display:block;
+    max-width:100%;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    text-align:center;
+    line-height:1.1;
+  }
+  .mj-central-discard-stage .mj-seat-left .mj-seat-score,
+  .mj-central-discard-stage .mj-seat-right .mj-seat-score{
+    margin-left:0;
+    font-size:10px;
+    line-height:1.1;
+  }
+}
