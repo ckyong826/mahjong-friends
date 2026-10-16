@@ -884,3 +884,149 @@ html:has(.mj-game),body:has(.mj-game){height:100%;overflow:hidden}
     line-height:1.1;
   }
 }
+
+
+/* #45 · Meld/flower overflow: the 5-column shared table leaves only a tiny
+ * cell for side players. Never squeeze or clip real tiles inside that cell:
+ * show two short accessible stats; full physical melds are in the dialog. */
+.mj-central-discard-stage .mj-public-tray{
+  display:flex;
+  align-items:stretch;
+  justify-content:stretch;
+  width:100%;
+  min-width:0;
+  min-height:0;
+  max-width:100%;
+  overflow:hidden;
+  box-sizing:border-box;
+  padding:1px;
+}
+.mj-central-discard-stage .mj-public-tray .mj-public-open{
+  box-sizing:border-box;
+  position:relative;
+  display:grid;
+  flex:1 1 auto;
+  grid-template-columns:minmax(0,1fr) 10px;
+  grid-template-rows:repeat(2,minmax(0,1fr));
+  align-items:center;
+  justify-items:start;
+  gap:0;
+  width:100%;
+  height:100%;
+  min-width:0;
+  min-height:0;
+  max-width:100%;
+  padding:0 2px;
+  margin:0;
+  border:0;
+  background:transparent;
+  cursor:pointer;
+  white-space:normal;
+  font-size:clamp(8px,.8vw,11px);
+  line-height:1.15;
+  text-align:left;
+  overflow:hidden;
+}
+.mj-central-discard-stage .mj-public-summary-meld,
+.mj-central-discard-stage .mj-public-summary-bonus{
+  display:block;
+  min-width:0;
+  max-width:100%;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  font-size:inherit;
+  font-weight:800;
+}
+.mj-central-discard-stage .mj-public-summary-meld{grid-area:1 / 1;color:#fbe6b4}
+.mj-central-discard-stage .mj-public-summary-bonus{grid-area:2 / 1;color:#d4f2c8}
+.mj-central-discard-stage .mj-public-arrow{
+  grid-area:1 / 2 / 3 / 3;
+  justify-self:center;
+  font-size:10px;
+  color:#fae1a0;
+}
+.mj-central-discard-stage .mj-public-open:hover{background:#27604b7a}
+.mj-central-discard-stage .mj-public-open:focus-visible{
+  outline:2px solid #fff0aa;
+  outline-offset:-2px;
+}
+.mj-history-public{
+  display:grid;
+  min-width:0;
+  min-height:0;
+  width:100%;
+  max-width:100%;
+  place-items:center;
+  overflow:hidden;
+}
+.mj-history-public .mj-showcases{
+  box-sizing:border-box;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:7px;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+  min-height:0;
+  max-height:none;
+  overflow:visible;
+  white-space:normal;
+}
+.mj-history-public .mj-bonus-group,
+.mj-history-public .mj-meld-group{
+  box-sizing:border-box;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  align-items:center;
+  gap:4px;
+  width:100%;
+  max-width:100%;
+  min-width:0;
+}
+.mj-history-public .mj-showcase-tiles,
+.mj-history-public .mj-showcase-melds{
+  display:flex;
+  flex-wrap:wrap;
+  flex:0 1 auto;
+  max-width:100%;
+  min-width:0;
+  justify-content:center;
+  gap:3px;
+}
+.mj-history-public .mj-meld{
+  display:flex;
+  max-width:100%;
+  min-width:0;
+  box-sizing:border-box;
+  flex:0 1 auto;
+  gap:3px;
+  padding:3px 5px;
+}
+.mj-history-public .mj-meld-tiles{
+  min-width:0;
+  flex:0 1 auto;
+}
+.mj-history-public .mj-meld-source{
+  flex:none;
+  white-space:nowrap;
+}
+.mj-history-public .mj-tile-mini{
+  flex:none;
+  box-sizing:border-box;
+  width:clamp(17px,3vw,27px);
+  height:clamp(24px,4vw,37px);
+}
+@media(max-height:540px) and (orientation:landscape){
+  .mj-central-discard-stage .mj-public-tray .mj-public-open{font-size:8px}
+  .mj-history-public .mj-showcases{gap:3px}
+  .mj-history-public .mj-meld{padding:1px 2px}
+  .mj-history-public .mj-tile-mini{width:18px;height:25px}
+  .mj-history-public .mj-meld-source{display:none}
+}
+@media(max-width:660px) and (orientation:portrait){
+  .mj-central-discard-stage .mj-public-tray .mj-public-open{font-size:8px}
+  .mj-history-public .mj-tile-mini{width:19px;height:28px}
+}

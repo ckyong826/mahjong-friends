@@ -105,4 +105,31 @@ describe("rendered Mahjong tabletop",()=>{
     expect(html).not.toContain("mj-history-dialog");
   });
 
+  it("does not mount clipped real meld/flower tiles in narrow board trays",()=>{
+    const kinds=["chi","pong","kong","chi"] as const;
+    const expanded:PlayerGameView={...game,players:game.players.map((player,i)=>({
+      ...player,
+      bonuses:Array.from({length:8},(_,n)=>f("flower-"+i+"-"+n,{
+        family:"flower" as const,
+        flower:(["spring","summer","autumn","winter","plum","orchid","bamboo-flower","chrysanthemum"] as const)[n]
+      })),
+      melds:kinds.map((kind,n)=>({
+        kind,concealed:false,fromPlayerId:"p1",
+        tileCount:kind==="kong"?4:3,
+        tiles:Array.from({length:kind==="kong"?4:3},(_,tileIndex)=>f(
+          "meld-"+i+"-"+n+"-"+tileIndex,{family:"suit",suit:"dots",rank:3}))
+      }))
+    }))};
+    const html=draw(expanded);
+    // All four players see a complete count; no physical meld may be
+    // partially truncated inside a 5-column table's narrow edge cells.
+    expect((html.match(/class="mj-public-tray"/g)??[])).toHaveLength(4);
+    expect((html.match(/class="mj-public-summary-meld"/g)??[])).toHaveLength(4);
+    expect((html.match(/class="mj-public-summary-bonus"/g)??[])).toHaveLength(4);
+    expect((html.match(/class="mj-showcases"/g)??[])).toHaveLength(0);
+    expect((html.match(/花 8/g)??[])).toHaveLength(4);
+    expect((html.match(/吃 4/g)??[])).toHaveLength(4);
+    expect((html.match(/4组明牌，8张花牌或动物牌/g)??[])).toHaveLength(4);
+  });
+
 });

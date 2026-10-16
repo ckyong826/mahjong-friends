@@ -47,7 +47,7 @@ The current four-player score calculation is labelled *Practice v1*, not an exac
 `.github/workflows/deploy.yml` now runs a **read-only production smoke** immediately after a successful Wrangler deployment, provided both credentials are present. It verifies:
 - `GET /api/health` returns JSON with `status: ok` and the expected app identity.
 - `GET /` returns HTML for Mahjong Friends.
-- `GET /mahjong-design-lab.html` returns the Design Lab HTML.
+- `GET /mahjong-design-lab` returns the Design Lab HTML.
 - An invalid room code returns **404 JSON**, not a React SPA fallback.
 
 This is an online read-only gateway/assets check; it **does not** prove Durable Object WebSocket gameplay. The production URL defaults to the current project workers.dev address, and can be changed without code using the non-secret repository variable `MAHJONG_PRODUCTION_URL` (bare HTTPS origin). If you change the custom domain or workers.dev subdomain, update the variable before deploying. A failed live smoke makes the deploy workflow fail instead of silently declaring success.
