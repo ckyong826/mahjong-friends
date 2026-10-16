@@ -818,3 +818,5 @@ html:has(.mj-game),body:has(.mj-game){height:100%;overflow:hidden}
 @media(prefers-reduced-motion:reduce){
   .mj-central-discard-stage .mj-tile-arriving,.mj-central-discard-stage .mj-avatar-bot{animation:none}
 }
+
+.mj-history-backdrop{position:fixed;inset:0;z-index:31;background:#001a17b5}
