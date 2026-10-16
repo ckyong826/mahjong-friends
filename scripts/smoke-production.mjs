@@ -51,7 +51,7 @@ export async function smokeReadOnly(raw,{fetchImpl=fetch,log=console.log}={}) {
   if(!/mahjong|麻将/i.test(html))throw new Error("home page is not Mahjong Friends");
   log("PASS: SPA home HTML is served");
 
-  const lab=await request(fetchImpl,base,"/mahjong-design-lab.html");
+  const lab=await request(fetchImpl,base,"/mahjong-design-lab");
   await requireStatus(lab,200,"design lab");
   if(!(lab.headers.get("content-type")??"").includes("text/html")){
     throw new Error("design lab did not return HTML");
@@ -60,7 +60,7 @@ export async function smokeReadOnly(raw,{fetchImpl=fetch,log=console.log}={}) {
   if(!/design.lab|布局|mahjong/i.test(labHtml)){
     throw new Error("design lab content missing");
   }
-  log("PASS: /mahjong-design-lab.html is served");
+  log("PASS: /mahjong-design-lab is served");
 
   // Invalid codes must return a typed API error, not the React SPA fallback.
   const invalid=await request(fetchImpl,base,"/api/rooms/not-a-valid-code");
