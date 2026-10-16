@@ -16,6 +16,15 @@ test("solo practice: host fills three seats, bots play real turns and reload pre
   await expect(page.locator(".mj-game")).toBeVisible();
   await expect(page.locator(".mj-river")).toHaveCount(4);
   await expect(page.locator(".mj-concealed")).toHaveCount(3);
+  // Exactly one true owner hand; opponents stay concealed despite animated
+  // avatars, and banker/bot badges derive from the authenticated room.
+  await expect(page.locator(".mj-avatar")).toHaveCount(4);
+  await expect(page.locator(".mj-avatar-bot")).toHaveCount(3);
+  await expect(page.locator(".mj-avatar-human")).toHaveCount(1);
+  await expect(page.locator(".mj-dealer-pill")).toHaveCount(1);
+  await expect(page.locator(".mj-feedback-self")).toContainText("轮到你出牌");
+  await expect(page.locator(".mj-seat-turn")).toHaveCount(1);
+  await page.screenshot({path:"test-results/v2-screenshots/solo-bot-scene.png",fullPage:false});
   // The host is East and therefore dealer in the first round.
   await page.locator(".mj-hand button").first().click();
   await page.getByRole("button",{name:/打出所选牌/}).click();
@@ -49,4 +58,10 @@ test("solo practice: host fills three seats, bots play real turns and reload pre
       n+p.discards.length+p.melds.reduce((m,meld)=>m+meld.tileCount,0),0)??0;
   },code),{timeout:10_000}).toBeGreaterThan(0);
   await expect(page.locator(".mj-seat-right .mj-seat-header")).toContainText("🤖");
+  await expect(page.locator(".mj-seat-right .mj-avatar-bot")).toBeVisible();
+  await expect(page.locator(".mj-avatar")).toHaveCount(4);
+  await expect(page.locator(".mj-dealer-pill")).toHaveCount(1);
+  // A refreshed game is reconstructed exclusively from real server snapshots,
+  // with no stale "thinking" spinner or opponent-private tile faces.
+  await expect(page.locator(".mj-concealed")).toHaveCount(3);
 });

@@ -477,3 +477,57 @@ html:has(.mj-game),body:has(.mj-game){height:100%;overflow:hidden}
 @media(prefers-reduced-motion:reduce){
   .mj-hand button.mj-tile,.mj-game .mj-action{transition:none}
 }
+
+/* v2-06 · Turn and Bot scene feedback, derived from acknowledged server data. */
+.mj-seat-header .mj-avatar{flex:none;display:grid;place-items:center;width:27px;height:27px;
+  border-radius:9px;background:linear-gradient(150deg,#345d55,#1c3834);
+  border:1px solid #b5c9af65;box-shadow:inset 0 1px 0 #f9fff226,0 2px 4px #031b155e;color:#d5ebe2}
+.mj-avatar svg{width:19px;height:19px;display:block}
+.mj-avatar-bot{color:#ffe0a1!important;background:linear-gradient(145deg,#736a4b,#344d3e)!important;
+  border-color:#e3c98d96!important}
+.mj-dealer-pill{flex:none;display:inline-grid;place-items:center;width:19px;height:19px;
+  background:linear-gradient(140deg,#ffebaf,#cfa65e);color:#2e4335;font-size:10px;
+  font-weight:900;border-radius:5px;border:1px solid #ffefc0;box-shadow:0 1px 6px #e1b86969}
+.mj-seat-turn{position:relative;border-color:#f8da8d;box-shadow:inset 0 0 0 1px #e5c47788,0 0 17px #ebd0905c}
+.mj-seat-turn .mj-avatar{outline:2px solid #f3d689;outline-offset:1px}
+.mj-seat-turn .mj-avatar-bot{animation:mj-bot-server-turn-glow 1.7s ease-in-out infinite}
+@keyframes mj-bot-server-turn-glow{
+  0%,100%{box-shadow:inset 0 1px 0 #f9fff226,0 0 4px #dfc17b55}
+  50%{box-shadow:inset 0 1px 0 #f9fff226,0 0 13px #f2d18da1}
+}
+.mj-seat-turn .mj-turn-pill{background:#d2a350;color:#123c31;border-radius:6px;padding:2px 5px;
+  font-weight:800;white-space:nowrap}
+.mj-center-state.mj-feedback-bot{color:#f9d784;text-shadow:0 1px 6px #a9744172}
+.mj-center-state.mj-feedback-self{color:#e8ffc2}
+.mj-center-state.mj-feedback-claims{color:#d1dfd8}
+.mj-center-detail{display:block;max-width:100%;font-size:10px;line-height:1.4;color:#bdd1bc;
+  white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.mj-tile.mj-tile-arriving{z-index:2;animation:mj-tile-placed .64s ease-out both;
+  box-shadow:0 0 0 2px #ffd786,0 0 14px #ffe4a37b}
+@keyframes mj-tile-placed {
+  0%{transform:translateY(-9px) scale(1.18);opacity:.55}
+  45%{transform:translateY(-3px) scale(1.08);opacity:1}
+  100%{transform:translateY(0) scale(1);opacity:1}
+}
+@media(max-width:940px){
+  .mj-seat-header .mj-avatar{width:20px;height:20px;border-radius:6px}
+  .mj-avatar svg{width:15px;height:15px}
+  .mj-dealer-pill{width:16px;height:16px;font-size:9px}
+}
+@media(max-height:540px) and (orientation:landscape){
+  .mj-seat-header .mj-avatar{width:16px;height:16px;border-radius:4px}
+  .mj-avatar svg{width:13px;height:13px}
+  .mj-dealer-pill{width:14px;height:14px;font-size:9px}
+  .mj-seat-turn .mj-turn-pill{padding:1px 2px;font-size:8px}
+  .mj-center-detail{display:none}
+  .mj-seat-header strong{max-width:55px}
+}
+@media(max-width:660px) and (orientation:portrait){
+  .mj-seat-header .mj-avatar{width:17px;height:17px;border-radius:4px}
+  .mj-avatar svg{width:13px;height:13px}
+  .mj-dealer-pill{width:14px;height:14px;font-size:8px}
+  .mj-center-detail{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .mj-tile.mj-tile-arriving,.mj-seat-turn .mj-avatar-bot{animation:none}
+}
