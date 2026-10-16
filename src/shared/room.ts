@@ -20,6 +20,8 @@ export interface PlayerPublicInfo {
   seat: Wind;
   ready: boolean;
   connected: boolean;
+  /** Server-controlled practice opponent, not a real connected client. */
+  isBot?: boolean;
 }
 
 /** Non-official Mahjong test-points profile; never real-money scores. */
