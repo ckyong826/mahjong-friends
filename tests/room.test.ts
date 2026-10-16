@@ -3,7 +3,7 @@ import { assertTileConservation, projectPlayerView } from "../src/game/engine";
 import {
   DEFAULT_RULES, findMember, joinRoom, makeRoomCode, newRoom,
   publicRoom, readyRoom, configureRoom, removeRoomMember, startRoom,
-  validateNickname, validateRules
+  validateNickname, validateRules, turnNudgeTarget, NUDGE_WAIT_MS, NUDGE_COOLDOWN_MS
 } from "../worker/roomCore";
 
 const create=()=>newRoom("ABCDEFG".slice(0,6),"host","hash-a","房主",1000);
@@ -84,5 +84,34 @@ describe("private lobby domain model",()=>{
     const room=create();
     expect(publicRoom(room,15_000).players[0].connected).toBe(true);
     expect(publicRoom(room,30_000).players[0].connected).toBe(false);
+  });
+});
+
+describe("server-authoritative white-screen turn reminder",()=>{
+  const running=()=>{
+    let room=full();
+    for(const member of room.members)room=readyRoom(room,member.id,true);
+    return {...startRoom(room,"host"),turnStartedAt:1000,lastNudgeAt:undefined as number|undefined};
+  };
+  it("targets ONLY actual current human after a 30s wait",()=>{
+    const room=running();
+    expect(room.game?.phase).toBe("discard");
+    expect(room.game?.players[room.game!.currentPlayerIndex].id).toBe("host");
+    expect(turnNudgeTarget(room,"p2",1000+NUDGE_WAIT_MS)).toBe("host");
+    expect(()=>turnNudgeTarget(room,"p2",1000+NUDGE_WAIT_MS-1)).toThrow("30秒");
+  });
+  it("rejects self, strangers, bots and non-active phases",()=>{
+    const room=running();
+    expect(()=>turnNudgeTarget(room,"host",40000)).toThrow("不能提醒自己");
+    expect(()=>turnNudgeTarget(room,"not-a-member",40000)).toThrow("只有房间真人");
+    expect(()=>turnNudgeTarget({...room,members:room.members.map(m=>
+      m.id==="host"?{...m,isBot:true}:m)},"p2",40000)).toThrow("练习机器人");
+    expect(()=>turnNudgeTarget({...room,state:"settlement"},"p2",40000)).toThrow("没有等待");
+  });
+  it("enforces a shared 60-second cooldown so players cannot spam",()=>{
+    const room={...running(),lastNudgeAt:34000};
+    expect(()=>turnNudgeTarget(room,"p2",34000+NUDGE_COOLDOWN_MS-1))
+      .toThrow("已提醒过");
+    expect(turnNudgeTarget(room,"p3",34000+NUDGE_COOLDOWN_MS)).toBe("host");
   });
 });
