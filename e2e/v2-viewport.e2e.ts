@@ -99,6 +99,22 @@ test("active Mahjong table fits desktop and phone landscape in one viewport",asy
       const overlapY=Math.min(a.bottom,b.bottom)-Math.max(a.top,b.top);
       expect(overlapX<=2||overlapY<=2,tag+" distinct river/center cells must not overlap").toBe(true);
     }
+    const bottomHud=await page.evaluate(()=>{
+      const header=document.querySelector(".mj-seat-bottom .mj-seat-header")!.getBoundingClientRect();
+      const tray=document.querySelector(".mj-seat-bottom .mj-public-tray")!.getBoundingClientRect();
+      const board=document.querySelector(".mj-board")!.getBoundingClientRect();
+      const text=document.querySelector(".mj-seat-bottom .mj-seat-header strong")!.getBoundingClientRect();
+      return {hudWidth:header.width,boardWidth:board.width,
+        hudRight:header.right,trayLeft:tray.left,hudBottom:header.bottom,
+        trayTop:tray.top,textWidth:text.width};
+    });
+    expect(bottomHud.hudWidth,tag+" local HUD must have legible width")
+      .toBeGreaterThan(bottomHud.boardWidth*.25);
+    expect(bottomHud.textWidth,tag+" player nickname must retain real width")
+      .toBeGreaterThan(20);
+    expect(bottomHud.hudRight<=bottomHud.trayLeft+2 ||
+      bottomHud.hudBottom<=bottomHud.trayTop+2,
+      tag+" local identity and public meld tray must not collide").toBe(true);
     await page.screenshot({path:"test-results/v2-screenshots/"+tag+".png",fullPage:false});
   }
   // Keep the actual one-tile select & confirmation path after viewport reflow.
