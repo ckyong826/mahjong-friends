@@ -102,13 +102,28 @@ function Seat({position,player,view,active,latest,score,windByPlayer,dealer,arri
   arrivingId:string|null;
 }) {
   const newest=latest?.fromPlayerId===player.id?latest.tile.id:null;
-  const riverPanel=useRef<HTMLDivElement>(null);
-  // A long river scrolls within its own seat, so the latest server discard is
-  // visible without moving the whole game page or altering tile ordering.
+  // Keep the visual table finite. The server's complete chronological river
+  // remains intact and can be inspected page-by-page without nested scrolling.
+  const [openPanel,setOpenPanel]=useState<"river"|"public"|null>(null);
+  const [historyPage,setHistoryPage]=useState(0);
+  const dialogRef=useRef<HTMLDivElement>(null);
+  const dialogTrigger=useRef<HTMLButtonElement|null>(null);
   useEffect(()=>{
-    const panel=riverPanel.current;
-    if(panel&&view.discards.length>0)panel.scrollTop=panel.scrollHeight;
-  },[view.discards.length,view.discards.at(-1)?.id]);
+    if(openPanel)dialogRef.current?.focus();
+    else dialogTrigger.current?.focus();
+  },[openPanel]);
+  const allRows=riverRows(view.discards);
+  const visibleRows=allRows.slice(-2);
+  const earlierTiles=view.discards.length-visibleRows.reduce((total,line)=>total+line.length,0);
+  const historyPageCount=Math.max(1,Math.ceil(view.discards.length/18));
+  const publicPageCount=Math.max(1,Math.ceil(view.melds.length/2),Math.ceil(view.bonuses.length/4));
+  const currentPageCount=openPanel==="river"?historyPageCount:publicPageCount;
+  const page=Math.min(historyPage,currentPageCount-1);
+  const showPanel=(kind:"river"|"public",trigger:HTMLButtonElement)=>{
+    dialogTrigger.current=trigger;
+    setHistoryPage(0);
+    setOpenPanel(kind);
+  };
   return <section className={"mj-seat mj-seat-"+position+(active?" mj-seat-turn":"")}
       aria-label={player.nickname+" 的弃牌区"}>
     <div className="mj-seat-header">
@@ -136,19 +151,78 @@ function Seat({position,player,view,active,latest,score,windByPlayer,dealer,arri
       {active&&<span className="mj-turn-pill">{player.isBot?"Bot 回合":"行动中"}</span>}
     </div>
     {position!=="bottom"&&<TileBack count={view.concealedCount} side={position}/>}
-    <div className="mj-discard-panel" ref={riverPanel}>
-      <div className="mj-discard-title">弃牌 <span>{view.discards.length}</span></div>
+    <div className="mj-discard-panel">
+      <div className="mj-discard-title">
+        <span>弃牌 {view.discards.length}</span>
+        <button type="button" className="mj-river-open" onClick={event=>showPanel("river",event.currentTarget)}
+          aria-label={"查看 "+player.nickname+" 全部弃牌"}>
+          {earlierTiles>0?"较早 +"+earlierTiles:"全部"} ↗
+        </button>
+      </div>
       <div className="mj-river" data-seat={position}
         aria-label={player.nickname+" 依时间顺序打出的牌"}>
         {view.discards.length===0?
           <span className="mj-empty-river">暂无弃牌</span>:
-          riverRows(view.discards).map((line,index)=><div className="mj-river-line"
-            key={index} data-line={index+1} aria-label={"第"+(index+1)+"排，"+line.length+"张"}>
+          visibleRows.map((line,index)=>{
+            const lineNumber=allRows.length-visibleRows.length+index+1;
+            return <div className="mj-river-line"
+              key={lineNumber} data-line={lineNumber} aria-label={"第"+lineNumber+"排，"+line.length+"张"}>
             {line.map(tile=><TileCard mini key={tile.id} tile={tile} latest={tile.id===newest} arriving={tile.id===arrivingId}/>)}
-          </div>)}
+          </div>;
+          })}
       </div>
     </div>
-    <DisplayMelds player={view} windByPlayer={windByPlayer}/>
+    <div className="mj-public-tray">
+      <DisplayMelds player={{...view,bonuses:view.bonuses.slice(0,2),melds:view.melds.slice(0,1)}}
+        windByPlayer={windByPlayer}/>
+      <button type="button" className="mj-public-open" onClick={event=>showPanel("public",event.currentTarget)}
+        aria-label={"查看 "+player.nickname+" 全部公开组合与花牌"}>
+        明{view.melds.length} 花{view.bonuses.length} ↗
+      </button>
+    </div>
+    {openPanel&&<div className="mj-history-backdrop" aria-hidden="true"
+      onClick={()=>setOpenPanel(null)}/>}
+    {openPanel&&<div className="mj-history-dialog" role="dialog" aria-modal="true"
+      ref={dialogRef} tabIndex={-1} aria-label={player.nickname+(openPanel==="river"?" 的完整弃牌记录":" 的全部公开组合")}
+      onKeyDown={event=>{
+        if(event.key==="Escape"){
+          event.stopPropagation();
+          setOpenPanel(null);
+          return;
+        }
+        if(event.key!=="Tab")return;
+        const items=Array.from(event.currentTarget.querySelectorAll<HTMLButtonElement>("button:not(:disabled)"));
+        if(!items.length){event.preventDefault();return;}
+        const first=items[0],last=items[items.length-1];
+        if(event.shiftKey&&(document.activeElement===first||document.activeElement===event.currentTarget)){
+          event.preventDefault();last.focus();
+        }else if(!event.shiftKey&&(document.activeElement===last||document.activeElement===event.currentTarget)){
+          event.preventDefault();first.focus();
+        }
+      }}>
+      <div className="mj-history-heading">
+        <strong>{player.nickname} · {openPanel==="river"?"按出牌时间排列":"公开明牌与花牌"}</strong>
+        <button type="button" onClick={()=>setOpenPanel(null)}>关闭</button>
+      </div>
+      {openPanel==="river"?
+        <div className="mj-history-river" aria-label="分页显示完整弃牌记录">
+          {riverRows(view.discards.slice(page*18,(page+1)*18)).map((line,i)=>
+            <div className="mj-history-line" key={i}>
+              {line.map(tile=><TileCard key={tile.id} tile={tile} mini
+                latest={tile.id===newest}/>)}
+            </div>)}
+          {view.discards.length===0&&<span>暂无弃牌</span>}
+        </div>:
+        <div className="mj-history-public">
+          <DisplayMelds player={{...view,bonuses:view.bonuses.slice(page*4,page*4+4),
+            melds:view.melds.slice(page*2,page*2+2)}} windByPlayer={windByPlayer}/>
+        </div>}
+      <div className="mj-history-pagination">
+        <button type="button" disabled={page===0} onClick={()=>setHistoryPage(p=>p-1)}>上一页</button>
+        <span>{page+1} / {currentPageCount}</span>
+        <button type="button" disabled={page>=currentPageCount-1} onClick={()=>setHistoryPage(p=>p+1)}>下一页</button>
+      </div>
+    </div>}
   </section>;
 }
 
@@ -268,11 +342,12 @@ export default function MahjongTable({
       </div>)}
       <small>练习计分，非正式家规</small>
     </div>
-    <div className="mj-board" aria-label="四家独立弃牌区，每家各自显示打过的牌">
+    <div className="mj-board mj-central-discard-stage" aria-label="中央共享布局，四家独立弃牌区，每家各自显示打过的牌">
       {byPosition("top")}
       {byPosition("left")}
       <div className="mj-center">
         <span className="mj-center-logo">友</span>
+        <span className="mj-center-wall">剩余 {game.liveWallCount} 张</span>
         <p className="mj-center-winds">東 · 南 · 西 · 北</p>
         <strong className={"mj-center-state mj-turn-feedback mj-feedback-"+feedback.kind} role="status"
           data-turn-kind={feedback.kind}>
