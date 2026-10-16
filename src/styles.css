@@ -531,3 +531,51 @@ html:has(.mj-game),body:has(.mj-game){height:100%;overflow:hidden}
 @media(prefers-reduced-motion:reduce){
   .mj-tile.mj-tile-arriving,.mj-seat-turn .mj-avatar-bot{animation:none}
 }
+
+/* v2-07 · compact accessible settlement sheet, never scroll the page. */
+.mj-results{display:flex;flex-direction:column;gap:5px;min-width:0;overscroll-behavior:contain;
+  scrollbar-width:thin;scrollbar-color:#c7b77b9a #104c3f;scroll-padding-block:18px}
+.mj-results:focus{outline:none}
+.mj-results-heading{text-align:center;padding:4px 8px 9px;border-bottom:1px solid #d2ac6b58}
+.mj-results-kicker{font-size:11px;color:#d9cca3;letter-spacing:.08em}
+.mj-results-heading h3{font-size:clamp(20px,3vw,31px);line-height:1.18;color:#ffe7a5;
+  margin:5px 0;font-weight:900}
+.mj-practice-disclaimer{font-size:11px;color:#f4deac;background:#31533c;border:1px solid #a5a26b6e;
+  padding:5px 8px;border-radius:6px;margin:6px auto 0!important;display:inline-block}
+.mj-results-score-section,.mj-results-fan-section{min-width:0}
+.mj-results h4{font-size:12px;letter-spacing:.04em;color:#eed3a3;text-align:center;
+  padding:0;margin:4px 0}
+.mj-settlement-totals{margin:4px auto 8px;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.mj-settlement-totals>div{min-width:0;padding:8px 4px;background:linear-gradient(155deg,#135b48,#084032);
+  box-shadow:inset 0 1px 0 #ffffff1b;border:1px solid #4f856f;border-radius:9px}
+.mj-settlement-totals span{font-size:11px;line-height:1.35;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;max-width:100%;display:block}
+.mj-settlement-totals strong{font-size:clamp(16px,2vw,21px)}
+.mj-settlement-totals small{font-size:10px}
+.mj-settlement-totals .mj-score-loss strong{color:#ffa89a}
+.mj-settlement-totals .mj-score-gain strong{color:#fce1a2}
+.mj-settlement-totals .mj-score-neutral strong{color:#c9dac9}
+.mj-settlement-lines{margin:3px auto 5px;gap:5px}
+.mj-settlement-lines>div{grid-template-columns:minmax(0,1fr) auto;padding:7px 9px;align-items:center}
+.mj-settlement-lines>div small{font-size:11px;line-height:1.35}
+.mj-next-round{position:sticky;bottom:-14px;background:#073d34fa;border-top:1px solid #d1b4787e;
+  padding:10px 6px 7px;margin-top:5px;box-shadow:0 -7px 14px #022119a5;
+  text-align:center;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap}
+.mj-next-round p{width:100%;margin:0;color:#d4e7d4}
+.mj-next-round .mj-action{min-width:125px}
+@media(max-height:540px) and (orientation:landscape){
+  .mj-results{max-height:calc(100dvh - 10px);padding:8px 13px;gap:2px}
+  .mj-results-heading{padding:1px 4px 4px}
+  .mj-results-heading h3{font-size:19px;margin:1px}
+  .mj-practice-disclaimer{font-size:10px;padding:3px 6px;margin:2px auto 0!important}
+  .mj-results h4{font-size:11px;margin:2px 0}
+  .mj-settlement-totals>div{padding:5px 4px}
+  .mj-settlement-totals strong{font-size:16px}
+  .mj-settlement-lines>div{padding:5px 7px}
+  .mj-next-round{bottom:-8px;padding:5px;margin-top:2px}
+}
+@media(max-width:490px){
+  .mj-settlement-totals{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .mj-results{width:calc(100vw - 18px);padding:10px}
+  .mj-next-round{bottom:-10px}
+}
