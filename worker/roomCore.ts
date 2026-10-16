@@ -10,6 +10,7 @@ export interface RoomMember {
   seat: Wind;
   ready: boolean;
   lastSeenAt: number;
+  isBot?: boolean;
 }
 export interface RoomRecord {
   code: string;
@@ -85,18 +86,27 @@ export function publicRoom(room:RoomRecord,now:number):RoomPublicView {
     roundNumber:room.roundNumber??0,scores:{...room.scores},lastSettlement:room.lastSettlement??null,
     players:room.members.map(m=>({
       id:m.id,nickname:m.nickname,seat:m.seat,ready:m.ready,
-      connected:now-m.lastSeenAt < 20_000
+      connected:m.isBot === true || now-m.lastSeenAt < 20_000,
+      isBot:m.isBot === true
     }))
   };
 }
 export function joinRoom(room:RoomRecord,playerId:string,tokenHash:string,nickname:string,now:number):RoomRecord {
   if (room.state !== "waiting") throw new RoomError(409,"牌局已经开始");
-  if (room.members.length >= 4) throw new RoomError(409,"房间已满");
+  const validatedName=validateNickname(nickname);
   if (room.members.some(m=>m.id===playerId || m.tokenHash===tokenHash)) throw new RoomError(409,"重复加入");
-  const seat=winds.find(w=>!room.members.some(m=>m.seat===w));
+  // Before starting, real friends always have priority over practice bots.
+  const replacedBot=[...room.members].reverse().find(m=>m.isBot);
+  if (room.members.length >= 4 && !replacedBot) throw new RoomError(409,"房间已满");
+  const seat=replacedBot?.seat ?? winds.find(w=>!room.members.some(m=>m.seat===w));
   if (!seat) throw new RoomError(409,"没有空座");
-  return {...room,scores:{...room.scores,[playerId]:0},
-    members:[...room.members,{id:playerId,tokenHash,nickname:validateNickname(nickname),seat,ready:false,lastSeenAt:now}]};
+  const members=room.members.filter(m=>m.id!==replacedBot?.id);
+  const scores={...room.scores};
+  if (replacedBot)delete scores[replacedBot.id];
+  scores[playerId]=0;
+  return {...room,scores,members:[...members,{
+    id:playerId,tokenHash,nickname:validatedName,seat,ready:false,lastSeenAt:now
+  }].sort((a,b)=>winds.indexOf(a.seat)-winds.indexOf(b.seat))};
 }
 export function readyRoom(room:RoomRecord,playerId:string,ready:boolean):RoomRecord {
   if(room.state !== "waiting" && room.state !== "settlement") throw new RoomError(409,"牌局已经开始");
@@ -106,7 +116,7 @@ export function readyRoom(room:RoomRecord,playerId:string,ready:boolean):RoomRec
 export function configureRoom(room:RoomRecord,actorId:string,rules:RoomRules):RoomRecord {
   if(room.state!=="waiting") throw new RoomError(409,"开局后不能修改规则");
   if(room.ownerId!==actorId) throw new RoomError(403,"只有房主可以更改规则");
-  return {...room,rules:validateRules(rules),members:room.members.map(m=>({...m,ready:false}))};
+  return {...room,rules:validateRules(rules),members:room.members.map(m=>({...m,ready:m.isBot===true}))};
 }
 export function removeRoomMember(room:RoomRecord,actorId:string,targetId:string):RoomRecord {
   if(room.state!=="waiting") throw new RoomError(409,"开局后不能退出或移除玩家");
@@ -126,7 +136,7 @@ export function settleRoom(room:RoomRecord):RoomRecord {
   const result=scoreRound(room.game,room.roundNumber??1,room.scores??{});
   return {
     ...room,state:"settlement",scores:{...result.totals},lastSettlement:result,
-    members:room.members.map(m=>({...m,ready:false}))
+    members:room.members.map(m=>({...m,ready:m.isBot===true}))
   };
 }
 
@@ -147,4 +157,26 @@ export function startRoom(room:RoomRecord,actorId:string):RoomRecord {
     scores:{...room.scores}
   };
   return game.phase==="ended"?settleRoom(opened):opened;
+}
+
+/** Only a real authenticated owner may add simple server-controlled training opponents.
+ * A bot carries no usable membership token and never receives private socket snapshots.
+ */
+export function fillRoomWithBots(room:RoomRecord,actorId:string,now:number,idFactory:()=>string):RoomRecord {
+  if(room.state!=="waiting")throw new RoomError(409,"只能在开局前加入机器人");
+  if(actorId!==room.ownerId)throw new RoomError(403,"只有房主可以添加机器人");
+  const members=[...room.members];
+  const scores={...room.scores};
+  for(const seat of winds) {
+    if(members.some(m=>m.seat===seat))continue;
+    const id="bot-"+idFactory();
+    if(members.some(m=>m.id===id))throw new RoomError(409,"机器人身份重复");
+    const label=({east:"东",south:"南",west:"西",north:"北"})[seat];
+    members.push({
+      id,tokenHash:"bot:no-login:"+id,nickname:"🤖 "+label+"位练习机器人",
+      seat,ready:true,lastSeenAt:now,isBot:true
+    });
+    scores[id]=0;
+  }
+  return {...room,members:members.sort((a,b)=>winds.indexOf(a.seat)-winds.indexOf(b.seat)),scores};
 }
