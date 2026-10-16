@@ -135,9 +135,10 @@ describe("rendered Mahjong tabletop",()=>{
     expect(html).not.toContain("mj-public-summary-bonus");
     // TileFaceArt renders each actual exposed tile with an accessible img
     // name on the in-board stage; no page-open interaction is required.
-    const exposedMarkup=html.match(/<div class="mj-public-fit"[^>]*>([\s\S]*?)<\/div><button/g);
-    expect(exposedMarkup).not.toBeNull();
-    expect((html.match(/aria-label="春"/g)??[]).length).toBeGreaterThanOrEqual(1);
+    expect((html.match(/data-melds="4" data-bonuses="8"/g)??[]))
+      .toHaveLength(seatCount);
+    expect((html.match(/aria-label="明花及动物牌"/g)??[]))
+      .toHaveLength(seatCount);
     expect((html.match(/data-kind="chi"/g)??[])).toHaveLength(seatCount*2);
     expect((html.match(/data-kind="kong"/g)??[])).toHaveLength(seatCount);
     expect((html.match(/data-kind="pong"/g)??[])).toHaveLength(seatCount);
