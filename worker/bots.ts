@@ -14,10 +14,13 @@ function pickDiscard(hand:readonly Tile[]):Tile {
     const pairs=hand.filter(other=>other.id!==tile.id&&sameNaturalFace(other,tile)).length;
     let neighbours=0;
     if(tile.face.family==="suit"){
-      neighbours=hand.filter(other=>other.face.family==="suit"&&
-        other.face.suit===tile.face.suit&&
-        Math.abs(other.face.rank-tile.face.rank)>0&&
-        Math.abs(other.face.rank-tile.face.rank)<=2).length;
+      const suit=tile.face.suit;
+      const rank=tile.face.rank;
+      neighbours=hand.filter(other=>{
+        const face=other.face;
+        return face.family==="suit"&&face.suit===suit&&
+          Math.abs(face.rank-rank)>0&&Math.abs(face.rank-rank)<=2;
+      }).length;
     }
     // Low-valued isolated honors and numerals are discarded before useful sets.
     return pairs*10+neighbours*3;
