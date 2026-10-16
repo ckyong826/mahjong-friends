@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import type { Tile } from "./shared/tiles";
 import TileFaceArt from "./game/TileFaceArt";
+import {tableTurnFeedback} from "./game/turnFeedback";
 import type { PlayerGameView, PublicPlayerView } from "./game/engine";
 import type { PlayerPublicInfo, RoomPublicView } from "./shared/room";
 import {
@@ -30,14 +31,14 @@ export interface MahjongTableProps {
   onNextRound?:()=>void;
 }
 
-function TileCard({tile,mini=false,selected=false,latest=false,onSelect,disabled=false,buttonRef}:{
-  tile:Tile;mini?:boolean;selected?:boolean;latest?:boolean;
+function TileCard({tile,mini=false,selected=false,latest=false,arriving=false,onSelect,disabled=false,buttonRef}:{
+  tile:Tile;mini?:boolean;selected?:boolean;latest?:boolean;arriving?:boolean;
   onSelect?:()=>void;disabled?:boolean;buttonRef?:(node:HTMLButtonElement|null)=>void;
 }) {
   const style=tileAppearance(tile);
   const className=[
     "mj-tile","mj-"+style.variant,mini?"mj-tile-mini":"",
-    selected?"mj-tile-selected":"",latest?"mj-tile-latest":""
+    selected?"mj-tile-selected":"",latest?"mj-tile-latest":"",arriving?"mj-tile-arriving":""
   ].filter(Boolean).join(" ");
   const inner=<TileFaceArt face={tile.face}/>;
   if(onSelect) {
@@ -89,7 +90,7 @@ function DisplayMelds({player,windByPlayer}:{player:PublicPlayerView;windByPlaye
     </div>}
   </div>;
 }
-function Seat({position,player,view,active,latest,score,windByPlayer}:{
+function Seat({position,player,view,active,latest,score,windByPlayer,dealer,arrivingId}:{
   position:SeatPosition;
   player:PlayerPublicInfo;
   view:PublicPlayerView;
@@ -97,6 +98,8 @@ function Seat({position,player,view,active,latest,score,windByPlayer}:{
   latest:{fromPlayerId:string;tile:Tile}|null;
   score:number;
   windByPlayer:Record<string,string>;
+  dealer:boolean;
+  arrivingId:string|null;
 }) {
   const newest=latest?.fromPlayerId===player.id?latest.tile.id:null;
   const riverPanel=useRef<HTMLDivElement>(null);
@@ -109,12 +112,28 @@ function Seat({position,player,view,active,latest,score,windByPlayer}:{
   return <section className={"mj-seat mj-seat-"+position+(active?" mj-seat-turn":"")}
       aria-label={player.nickname+" 的弃牌区"}>
     <div className="mj-seat-header">
+      <span className={"mj-avatar"+(player.isBot?" mj-avatar-bot":" mj-avatar-human")}
+        title={player.isBot?"练习机器人":"真人玩家"} aria-hidden="true">
+        {player.isBot?
+          <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+            <rect x="6" y="10" width="20" height="16" rx="5" fill="currentColor"/>
+            <rect x="14" y="5" width="4" height="6" rx="2" fill="currentColor"/>
+            <circle cx="12" cy="17" r="2.2" fill="#103d31"/>
+            <circle cx="20" cy="17" r="2.2" fill="#103d31"/>
+            <rect x="11" y="22" width="10" height="2" rx="1" fill="#103d31"/>
+          </svg>:
+          <svg viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+            <circle cx="16" cy="12" r="6" fill="currentColor"/>
+            <path d="M5 29c1-8 6-11 11-11s10 3 11 11" fill="currentColor"/>
+          </svg>}
+      </span>
       <span className="mj-wind">{windText(player.seat)}</span>
       <strong>{player.nickname}</strong>
+      {dealer&&<span className="mj-dealer-pill" title="本局庄家">庄</span>
       {player.isBot&&<span className="mj-bot-label" title="练习机器人">BOT</span>}
       <span className="mj-seat-score">{score}分</span>
       {position!=="bottom"&&<span className="mj-seat-count">{view.concealedCount}张</span>}
-      {active&&<span className="mj-turn-pill">行动中</span>}
+      {active&&<span className="mj-turn-pill">{player.isBot?"Bot 回合":"行动中"}</span>}
     </div>
     {position!=="bottom"&&<TileBack count={view.concealedCount} side={position}/>}
     <div className="mj-discard-panel" ref={riverPanel}>
@@ -125,7 +144,7 @@ function Seat({position,player,view,active,latest,score,windByPlayer}:{
           <span className="mj-empty-river">暂无弃牌</span>:
           riverRows(view.discards).map((line,index)=><div className="mj-river-line"
             key={index} data-line={index+1} aria-label={"第"+(index+1)+"排，"+line.length+"张"}>
-            {line.map(tile=><TileCard mini key={tile.id} tile={tile} latest={tile.id===newest}/>)}
+            {line.map(tile=><TileCard mini key={tile.id} tile={tile} latest={tile.id===newest} arriving={tile.id===arrivingId}/>)}
           </div>)}
       </div>
     </div>
@@ -149,6 +168,17 @@ export default function MahjongTable({
 }:MahjongTableProps) {
   const [selectedId,setSelectedId]=useState<string|null>(null);
   const handButtons=useRef(new Map<string,HTMLButtonElement>());
+  const [arrivingId,setArrivingId]=useState<string|null>(null);
+  const seenLastDiscard=useRef(game.lastDiscard?.tile.id??null);
+  useEffect(()=>{
+    const id=game.lastDiscard?.tile.id??null;
+    const changed=id!==null&&id!==seenLastDiscard.current;
+    seenLastDiscard.current=id;
+    if(!changed)return;
+    setArrivingId(id);
+    const timer=setTimeout(()=>setArrivingId(null),670);
+    return ()=>clearTimeout(timer);
+  },[game.lastDiscard?.tile.id]);
   useEffect(()=>setSelectedId(null),[game.version]);
 
   const myPublic=room.players.find(p=>p.id===viewerId);
@@ -184,6 +214,7 @@ export default function MahjongTable({
   const claimTile=game.pendingDiscard?.tile;
   const ownKongs=useMemo(()=>concealedKongOptions(myHand),[myHand]);
   const upgrades=useMemo(()=>addedKongOptions(myHand,myPrivate?.melds??[]),[myHand,myPrivate?.melds]);
+  const feedback=tableTurnFeedback(game,room.players,viewerId);
   const outcome=game.outcome;
   const winner=outcome?.winnerId?room.players.find(p=>p.id===outcome.winnerId):null;
   if(!myPublic||!myPrivate) {
@@ -196,8 +227,9 @@ export default function MahjongTable({
     const user=room.players.find(p=>p.id===seat.id);
     if(!user)return null;
     return <Seat position={position} player={user} view={seat.game}
-      active={game.phase!=="ended"&&game.currentPlayerId===seat.id}
-      latest={game.lastDiscard} score={room.scores?.[user.id]??0} windByPlayer={windByPlayer}/>;
+      active={feedback.activePlayerId===seat.id}
+      latest={game.lastDiscard} score={room.scores?.[user.id]??0}
+      dealer={game.dealerId===seat.id} arrivingId={arrivingId} windByPlayer={windByPlayer}/>;
   };
 
   return <div className="mj-game" aria-label="四人实时麻将桌">
@@ -238,11 +270,13 @@ export default function MahjongTable({
       <div className="mj-center">
         <span className="mj-center-logo">友</span>
         <p className="mj-center-winds">東 · 南 · 西 · 北</p>
-        {game.phase==="ended" ?
-          <strong className="mj-center-state">{outcome?.type==="draw"?"本局流局":(winner?.nickname??"玩家")+" 胡牌"}</strong>:
-          game.phase==="claims"?
-            <strong className="mj-center-state">等待吃碰杠胡</strong>:
-            <strong className="mj-center-state">{game.currentPlayerId===viewerId?"轮到你出牌":"等待 "+(room.players.find(p=>p.id===game.currentPlayerId)?.nickname??"其他玩家")}</strong>}
+        <strong className={"mj-center-state mj-turn-feedback mj-feedback-"+feedback.kind} role="status"
+          data-turn-kind={feedback.kind}>
+          {game.phase==="ended"?
+            outcome?.type==="draw"?"本局流局":(winner?.nickname??"玩家")+" 胡牌":
+            feedback.headline}
+        </strong>
+        <span className="mj-center-detail" aria-hidden="true">{feedback.detail}</span>
         {claimTile&&<div className="mj-center-claim">当前出牌 <TileCard mini tile={claimTile}/></div>}
       </div>
       {byPosition("right")}
