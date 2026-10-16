@@ -1191,6 +1191,127 @@ html:has(.mj-game),body:has(.mj-game){height:100%;overflow:hidden}
   .mj-central-discard-stage .mj-public-fit .mj-meld-name{font-size:9px}
 }
 
+/* #48 / #49 — in-game explanation and user-unlocked Mahjong audio controls */
+.mj-game .mj-help-open,.mj-game .mj-audio-toggle{
+  display:inline-flex;
+  flex:none;
+  min-width:27px;
+  height:28px;
+  padding:2px 6px;
+  align-items:center;
+  justify-content:center;
+  border:1px solid #c5b181;
+  background:#175343;
+  color:#f9e4ae;
+  font-weight:900;
+  border-radius:7px;
+  font-size:11px;
+  white-space:nowrap;
+  cursor:pointer;
+}
+.mj-game .mj-help-open{border-radius:50%;font-size:16px;width:28px;padding:0}
+.mj-game .mj-audio-toggle[aria-pressed=true]{background:#386d56;color:#fff9cc}
+.mj-game .mj-help-open:focus-visible,.mj-game .mj-audio-toggle:focus-visible{
+  outline:2px solid #fff2aa;outline-offset:2px;
+}
+.mj-help-backdrop{
+  position:fixed;
+  z-index:39;
+  inset:0;
+  background:#061e1bcf;
+}
+.mj-help-dialog{
+  position:fixed;
+  z-index:40;
+  inset:50% auto auto 50%;
+  transform:translate(-50%,-50%);
+  display:flex;
+  flex-direction:column;
+  box-sizing:border-box;
+  width:min(630px,calc(100vw - 20px));
+  max-height:calc(100dvh - 14px);
+  min-height:0;
+  padding:12px;
+  gap:8px;
+  overflow:hidden;
+  color:#f5eacb;
+  background:linear-gradient(145deg,#165443,#092f29);
+  border:2px solid #d4b981;
+  border-radius:12px;
+  box-shadow:0 12px 40px #041d19a6;
+}
+.mj-help-heading{
+  flex:none;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  font-size:16px;
+  color:#ffdd98;
+}
+.mj-help-heading button{
+  flex:none;
+  min-height:29px;
+  min-width:34px;
+  border-radius:6px;
+  color:#fff1c8;
+  background:#275b49;
+  border:1px solid #d9c48f;
+  cursor:pointer;
+}
+.mj-help-tabs{flex:none;display:flex;gap:7px}
+.mj-help-tabs button{
+  min-height:29px;
+  flex:1;
+  border-radius:6px;
+  font-weight:800;
+  color:#e7e1c4;
+  background:#103d32;
+  border:1px solid #6e987f;
+  cursor:pointer;
+}
+.mj-help-tabs button[aria-pressed=true]{background:#f0d38f;border-color:#ffe7b2;color:#163f30}
+.mj-help-dialog button:focus-visible{outline:2px solid #ffffff;outline-offset:1px}
+.mj-help-body{
+  flex:1 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+  scrollbar-width:thin;
+  padding:2px 4px 4px 0;
+  font-size:12px;
+  line-height:1.5;
+}
+.mj-help-body h3{font-size:14px;color:#ffe3a7;margin:4px 0 7px}
+.mj-help-body p{margin:4px 0 9px}
+.mj-help-body dl{margin:0}
+.mj-help-body dl div{
+  display:grid;
+  grid-template-columns:42px minmax(0,1fr);
+  gap:5px;
+  padding:4px 0;
+  border-bottom:1px solid #84b39646;
+}
+.mj-help-body dt{font-weight:900;color:#f6d68f}
+.mj-help-body dd{margin:0}
+.mj-help-body table{border-collapse:collapse;width:100%;font-size:12px;table-layout:fixed}
+.mj-help-body th,.mj-help-body td{padding:4px 6px;border-bottom:1px solid #719b8077;text-align:left}
+.mj-help-body th:last-child,.mj-help-body td:last-child{width:76px;text-align:right;font-weight:900}
+.mj-help-warning{
+  color:#ffe9b8;
+  padding:5px 8px;
+  border-left:3px solid #e1bc78;
+  background:#2e5540;
+}
+.mj-help-note{font-size:11px;color:#bfdcc7}
+@media(max-width:660px){
+  .mj-top-actions{gap:4px}
+  .mj-game .mj-help-open{height:25px;min-width:25px;width:25px}
+  .mj-game .mj-audio-toggle{height:25px;font-size:10px;padding:1px 3px}
+  .mj-help-dialog{padding:8px;gap:5px}
+  .mj-help-heading{font-size:14px}
+  .mj-help-body{font-size:11px}
+}
 
 /* #50 · Server-authorized, rate-limited turn reminder.
  * A single visible attention panel (never strobing) and user opt-out. */

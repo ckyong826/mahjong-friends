@@ -1,6 +1,8 @@
 import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
 import type { Tile } from "./shared/tiles";
 import TileFaceArt from "./game/TileFaceArt";
+import GameHelp from "./game/GameHelp";
+import {useGameAudio} from "./game/useGameAudio";
 import {tableTurnFeedback} from "./game/turnFeedback";
 import type { PlayerGameView, PublicPlayerView } from "./game/engine";
 import type { PlayerPublicInfo, RoomPublicView } from "./shared/room";
@@ -209,9 +211,7 @@ function Seat({position,player,view,active,latest,score,windByPlayer,dealer,arri
       {position!=="bottom"&&<span className="mj-seat-count">{view.concealedCount}张</span>}
       {active&&<span className="mj-turn-pill">{player.isBot?"Bot 回合":"行动中"}</span>}
       {canNudge&&onNudge&&<button type="button" className="mj-turn-nudge"
-        aria-label={"提醒 "+player.nickname+" 轮到出牌"} onClick={onNudge}>
-        ✨ 提醒
-      </button>}
+        aria-label={"提醒 "+player.nickname+" 轮到出牌"} onClick={onNudge}>✨ 提醒</button>}
     </div>
     {position!=="bottom"&&<TileBack count={view.concealedCount} side={position}/>}
     <div className="mj-discard-panel">
@@ -323,6 +323,10 @@ export default function MahjongTable({
     const timer=window.setTimeout(()=>setShowAttention(false),1600);
     return ()=>window.clearTimeout(timer);
   },[attentionEvent?.at]);
+  const [helpOpen,setHelpOpen]=useState(false);
+  const helpButtonRef=useRef<HTMLButtonElement>(null);
+  const audio=useGameAudio(game);
+  const closeHelp=()=>{setHelpOpen(false);requestAnimationFrame(()=>helpButtonRef.current?.focus());};
   const handButtons=useRef(new Map<string,HTMLButtonElement>());
   const resultsRef=useRef<HTMLDivElement>(null);
   useEffect(()=>{
@@ -395,8 +399,7 @@ export default function MahjongTable({
       active={feedback.activePlayerId===seat.id}
       latest={game.lastDiscard} score={room.scores?.[user.id]??0}
       dealer={game.dealerId===seat.id} arrivingId={arrivingId} windByPlayer={windByPlayer}
-      canNudge={canNudge&&seat.id===game.currentPlayerId}
-      onNudge={onTurnNudge}/>;
+      canNudge={canNudge&&seat.id===game.currentPlayerId} onNudge={onTurnNudge}/>;
   };
 
   return <div className="mj-game" aria-label="四人实时麻将桌">
@@ -415,12 +418,21 @@ export default function MahjongTable({
       </div>
     </div>}
     {nudgeNotice&&<div className="mj-nudge-toast" role="status">{nudgeNotice}</div>}
+    {helpOpen&&<GameHelp onClose={closeHelp}/>}
     <div className="mj-topbar">
       <div>
         <p className="mj-eyebrow">MAHJONG FRIENDS · 私人牌局</p>
         <h2>好友麻将 <span className="mj-room-code">{room.code}</span></h2>
       </div>
       <div className="mj-top-actions">
+        <button ref={helpButtonRef} type="button" className="mj-help-open"
+          aria-label="玩法与算番说明" title="玩法与练习番数"
+          onClick={()=>setHelpOpen(true)}>?</button>
+        <button type="button" className="mj-audio-toggle"
+          aria-pressed={audio.enabled} onClick={audio.toggle}
+          title="启用后打牌有牌声，吃碰杠尝试使用系统中文女声">
+          {audio.enabled?"🔊 音效":"🔇 音效"}
+        </button>
         <span className={"mj-connection mj-connection-"+connection} role="status">
           <span className="mj-connection-dot"/>
           {connection==="connected"?"实时联机":connection==="connecting"?"连接中":"断线重连"}
