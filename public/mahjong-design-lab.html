@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#091e1c">
+<meta name="description" content="Mahjong Friends v2 - 10 UI/UX proposals, no nested scroll and no clipped actions.">
+<title>Mahjong Friends / 10 UI·UX concept prototypes</title>
+<style>
+*{box-sizing:border-box}html{background:#0c1718;color:#eef5eb;font-family:Inter,"Noto Sans SC",system-ui,-apple-system,sans-serif}body{margin:0}button{font:inherit;cursor:pointer}button:focus-visible{outline:3px solid #9feac0;outline-offset:2px}button:disabled{opacity:.4;cursor:not-allowed}.shell{width:min(1520px,100%);margin:auto;padding:22px clamp(12px,3vw,35px) 55px}.shell-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}.logo{font-weight:900;font-size:16px;letter-spacing:.16em;color:#b5f2c8}.eyebrow{font-size:11px;letter-spacing:.18em;color:#80a69a;text-transform:uppercase}.shell h1{font-size:clamp(23px,3vw,38px);line-height:1.12;margin:12px 0 9px;font-weight:850;letter-spacing:-.05em}.intro{max-width:990px;color:#a9c0b8;font-size:13px;line-height:1.65;margin:0 0 15px}.shell-pill{border:1px solid #55786e;border-radius:25px;padding:8px 12px;font-size:11px;color:#b7d4c6;white-space:nowrap}.device-row{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin:13px 0 12px}.device-row button,.small-action{border:1px solid #41645c;border-radius:8px;color:#b9d5c9;background:#17332d;padding:9px 12px;font-size:12px;font-weight:700}.device-row button[aria-pressed=true]{background:#d6edcc;color:#15352c;border-color:#d6edcc}.proto-info{display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap;margin:8px 0 12px}.proto-title{font-size:20px;font-weight:800}.proto-sub{font-size:12px;color:#9fbaad;margin:5px 0 0;max-width:780px;line-height:1.55}.prototype-shell{border:1px solid #375950;border-radius:15px;background:radial-gradient(ellipse at 50% 0%,#233b36,#102423 66%);padding:12px;overflow:hidden}.stage{width:100%;overflow:hidden;display:flex;align-items:flex-start;justify-content:center;position:relative;min-height:180px}.screen{--bg:#0a4438;--felt:#165a45;--card:#184b3d;--accent:#f2d687;--ink:#f6f5e9;--muted:#b7cfc0;--tile:#fff8ea;--tileInk:#27644f;--tileEdge:#b0a98e;--border:rgba(208,239,200,.22);position:absolute;left:50%;top:0;transform-origin:top center;color:var(--ink);background:var(--bg);width:1100px;height:620px;overflow:hidden;isolation:isolate;font-family:Inter,"Noto Sans SC",system-ui,sans-serif}.screen::before{content:"";position:absolute;inset:55px 23px 100px;border:2px solid var(--border);border-radius:28px;pointer-events:none}.screen *{box-sizing:border-box}.game-header{position:absolute;top:0;left:0;right:0;height:61px;display:flex;justify-content:space-between;align-items:center;gap:8px;padding:10px 29px;z-index:3;background:rgba(0,0,0,.10);border-bottom:1px solid var(--border)}.game-brand{font-size:15px;font-weight:900;letter-spacing:.08em;color:var(--accent)}.game-brand small{display:block;color:var(--muted);font-weight:500;font-size:9px;letter-spacing:.12em;margin-top:3px}.game-top-data{display:flex;gap:9px;align-items:center}.game-top-data span{font-size:12px;border:1px solid var(--border);border-radius:7px;padding:6px 9px;white-space:nowrap}.game-top-data b{color:var(--accent)}.game-table{position:absolute;inset:62px 23px 121px;background:radial-gradient(ellipse at center,var(--felt),transparent 74%);border-radius:24px;overflow:hidden}.seat{position:absolute;background:var(--card);border:1px solid var(--border);border-radius:11px;padding:7px;overflow:hidden;box-shadow:0 4px 14px #00000012;z-index:1}.seat.top{width:320px;height:138px;top:8px;left:calc(50% - 160px)}.seat.bottom{width:320px;height:122px;bottom:6px;left:calc(50% - 160px)}.seat.left{width:258px;height:245px;top:110px;left:12px}.seat.right{width:258px;height:245px;top:110px;right:12px}.seat-h{display:flex;align-items:center;gap:6px;min-width:0;height:21px}.avatar{width:19px;height:19px;border-radius:6px;background:var(--accent);color:var(--card);display:grid;place-items:center;font-size:11px;font-weight:900;flex:none}.seat-name{font-size:12px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:115px}.seat-score{font-size:10px;margin-left:auto;color:var(--accent);font-weight:800;white-space:nowrap}.dealer{font-size:9px;border-radius:4px;color:var(--bg);background:var(--accent);padding:2px 4px;font-weight:900}.active{box-shadow:inset 0 0 0 1px var(--accent),0 0 16px rgba(254,232,132,.23)}.seat-sub{font-size:9px;color:var(--muted);height:14px;white-space:nowrap;overflow:hidden}.mini-grid{display:grid;grid-template-columns:repeat(6,19px);grid-auto-rows:22px;gap:2px;align-content:start;justify-content:center;margin:4px auto 0;width:max-content;max-width:100%}.mini-tile{background:var(--tile);color:var(--tileInk);border-radius:2px;border-bottom:2px solid var(--tileEdge);font-size:9px;font-weight:900;display:grid;place-items:center;line-height:1;box-shadow:0 1px 2px #0002}.mini-tile.red{color:#c54e47}.mini-tile.special{color:#bd8b2f}.seat-river-footer{font-size:9px;color:var(--muted);text-align:center;margin:3px 0 0;display:flex;gap:6px;align-items:center;justify-content:center}.river-expand{border:1px solid var(--border);background:transparent;color:var(--accent);border-radius:4px;padding:2px 5px;font-size:9px}.meld{font-size:9px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:3px;text-align:center}.center{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);height:124px;width:304px;border:1px solid var(--border);border-radius:17px;background:var(--card);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:6px;text-align:center;padding:12px;z-index:1}.center-logo{font-size:32px;font-weight:900;color:var(--accent);line-height:1}.center-status{font-weight:850;color:var(--ink);font-size:16px}.center-meta{font-size:10px;color:var(--muted)}.hand-dock{position:absolute;bottom:0;left:0;right:0;height:121px;border-top:2px solid var(--border);background:var(--card);padding:8px 22px;display:flex;gap:18px;align-items:center;justify-content:center;overflow:hidden}.hand-area{display:flex;flex-direction:column;justify-content:center;gap:5px;min-width:0}.hand-label{font-size:10px;font-weight:800;color:var(--muted);height:15px}.hand-tiles{display:flex;gap:3px;flex-wrap:nowrap;align-items:flex-end;justify-content:center}.my-tile{width:34px;height:52px;flex:none;background:var(--tile);color:var(--tileInk);border:1px solid var(--tileEdge);border-bottom:5px solid #87b09b;border-radius:5px 5px 4px 4px;font-size:14px;font-weight:900;display:grid;place-items:center;padding:0;transition:transform .12s,box-shadow .12s;box-shadow:0 2px 3px #0002}.my-tile.sel{transform:translateY(-8px);box-shadow:0 0 0 2px var(--accent)}.my-tile.red{color:#c1494a}.my-tile.special{border-color:#d7ac55;color:#b9871c}.dock-actions{display:grid;grid-template-columns:100px 100px;gap:6px;align-items:center;align-content:center}.action{min-width:0;padding:9px 10px;min-height:38px;border:1px solid var(--border);border-radius:8px;background:transparent;color:var(--ink);font-size:11px;font-weight:850;white-space:nowrap}.action.primary{grid-column:span 2;background:var(--accent);color:var(--bg);border-color:var(--accent)}.demo-toast{position:absolute;z-index:8;left:50%;bottom:126px;transform:translateX(-50%);background:var(--accent);color:var(--bg);padding:7px 14px;font-weight:850;font-size:11px;border-radius:20px}.detail-overlay{position:absolute;z-index:10;inset:0;background:rgba(2,15,12,.72);display:flex;align-items:center;justify-content:center}.detail-card{width:min(470px,calc(100% - 34px));max-height:calc(100% - 26px);overflow:hidden;background:var(--card);border:2px solid var(--accent);border-radius:17px;padding:16px;display:flex;flex-direction:column;gap:9px}.detail-card h3{margin:0;font-size:18px}.detail-card p{margin:0;font-size:11px;color:var(--muted)}.detail-card .mini-grid{grid-template-columns:repeat(8,27px);grid-auto-rows:33px;gap:3px;margin:8px auto}.detail-card .mini-tile{font-size:12px}.detail-tools{display:flex;justify-content:center;gap:10px;align-items:center}.detail-tools button{border:1px solid var(--border);border-radius:6px;background:var(--felt);color:var(--ink);padding:7px 11px}.detail-tools .close{background:var(--accent);color:var(--bg)}.tipbar{font-size:11px;line-height:1.5;color:#a3c2b4;margin-top:10px;display:flex;gap:12px;align-items:center;justify-content:space-between;flex-wrap:wrap}.tipbar strong{color:#e6edbe}.concepts{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin-top:14px}.concept{min-width:0;display:flex;flex-direction:column;text-align:left;padding:9px;border-radius:12px;border:1px solid #3b5a54;background:#132a27;color:#eaf4e9}.concept[aria-pressed=true]{border-color:#d6f0bd;box-shadow:0 0 0 1px #d6f0bd;background:#1c3731}.thumb{height:96px;width:100%;border-radius:8px;position:relative;background:var(--bg);border:1px solid var(--border);overflow:hidden;margin-bottom:9px}.thumb:before{content:"";position:absolute;inset:16px 8px 21px;border:1px solid var(--border);border-radius:6px;background:var(--felt)}.thumb .tt{position:absolute;background:var(--card);border:1px solid var(--border);border-radius:3px}.thumb .ta{top:20px;left:38%;width:24%;height:20%}.thumb .tl{top:34%;left:11px;width:26%;height:40%}.thumb .tr{top:34%;right:11px;width:26%;height:40%}.thumb .tb{bottom:23px;left:38%;width:24%;height:20%}.thumb .tc{position:absolute;top:44%;left:42%;width:16%;height:19%;border-radius:5px;border:1px solid var(--accent);background:var(--card)}.thumb .td{position:absolute;bottom:3px;left:9px;right:9px;height:13px;background:var(--card);border-top:2px solid var(--accent);border-radius:3px}.concept-id{font-size:9px;color:#9dbcb2;letter-spacing:.10em}.concept strong{font-size:13px;display:block;margin-top:2px}.concept small{color:#9db8af;font-size:10px;line-height:1.4;margin-top:4px;min-height:28px}.labeled{display:inline-block;color:var(--accent);font-size:9px;white-space:nowrap;font-weight:800}.footer-note{font-size:12px;color:#93b5a9;line-height:1.6;margin-top:14px;border-top:1px solid #38594f;padding-top:12px}.footer-note a{color:#c8eed3}.seat.compact-content .seat-sub{display:none}
+.screen[data-device="desktop"] .seat.bottom{height:132px}
+.screen[data-device="desktop"] .seat.bottom .seat-sub{display:none}
+.screen[data-device="landscape"]{width:844px;height:390px}.screen[data-device="portrait"]{width:390px;height:844px}
+.screen[data-device="landscape"]::before{inset:32px 9px 93px;border-radius:15px}.screen[data-device="landscape"] .game-header{height:32px;padding:2px 13px}.screen[data-device="landscape"] .game-brand{font-size:10px}.screen[data-device="landscape"] .game-brand small{display:none}.screen[data-device="landscape"] .game-top-data span{padding:2px 5px;font-size:9px}.screen[data-device="landscape"] .game-table{inset:33px 9px 91px;border-radius:12px}.screen[data-device="landscape"] .seat{padding:3px;border-radius:5px}.screen[data-device="landscape"] .seat.top{width:245px;height:78px;top:3px;left:calc(50% - 122px)}.screen[data-device="landscape"] .seat.bottom{width:245px;height:77px;bottom:3px;left:calc(50% - 122px)}.screen[data-device="landscape"] .seat.left{width:183px;height:152px;top:55px;left:3px}.screen[data-device="landscape"] .seat.right{width:183px;height:152px;top:55px;right:3px}.screen[data-device="landscape"] .seat-h{height:15px;gap:3px}.screen[data-device="landscape"] .avatar{width:13px;height:13px;font-size:8px;border-radius:3px}.screen[data-device="landscape"] .seat-name{font-size:9px;max-width:70px}.screen[data-device="landscape"] .seat-score{font-size:8px}.screen[data-device="landscape"] .seat-sub,.screen[data-device="landscape"] .meld{display:none}.screen[data-device="landscape"] .mini-grid{grid-template-columns:repeat(6,13px);grid-auto-rows:15px;gap:1px;margin-top:2px}.screen[data-device="landscape"] .mini-tile{font-size:7px;border-bottom-width:1px}.screen[data-device="landscape"] .seat-river-footer{margin-top:1px;font-size:7px}.screen[data-device="landscape"] .river-expand{font-size:7px;padding:1px 3px}.screen[data-device="landscape"] .center{height:72px;width:208px;border-radius:10px;gap:3px;padding:6px}.screen[data-device="landscape"] .center-logo{font-size:17px}.screen[data-device="landscape"] .center-status{font-size:12px}.screen[data-device="landscape"] .center-meta{font-size:8px}.screen[data-device="landscape"] .hand-dock{height:91px;padding:6px 8px;gap:9px}.screen[data-device="landscape"] .hand-label{font-size:8px;height:12px}.screen[data-device="landscape"] .hand-tiles{gap:2px}.screen[data-device="landscape"] .my-tile{width:28px;height:43px;font-size:12px;border-bottom-width:4px}.screen[data-device="landscape"] .dock-actions{grid-template-columns:92px 92px;gap:4px}.screen[data-device="landscape"] .action{min-height:29px;padding:3px 4px;font-size:10px}.screen[data-device="landscape"] .demo-toast{bottom:95px}.screen[data-device="portrait"]::before{inset:58px 8px 210px;border-radius:16px}.screen[data-device="portrait"] .game-header{height:58px;padding:6px 11px;align-items:flex-start;flex-direction:column;justify-content:center;gap:3px}.screen[data-device="portrait"] .game-brand{font-size:12px}.screen[data-device="portrait"] .game-brand small{display:none}.screen[data-device="portrait"] .game-top-data{gap:3px}.screen[data-device="portrait"] .game-top-data span{font-size:8px;padding:3px 5px}.screen[data-device="portrait"] .game-table{inset:60px 8px 210px;border-radius:16px}.screen[data-device="portrait"] .seat{padding:4px;border-radius:6px}.screen[data-device="portrait"] .seat.top{width:197px;height:136px;top:9px;left:calc(50% - 98px)}.screen[data-device="portrait"] .seat.bottom{width:197px;height:121px;bottom:9px;left:calc(50% - 98px)}.screen[data-device="portrait"] .seat.left{width:145px;height:235px;top:155px;left:4px}.screen[data-device="portrait"] .seat.right{width:145px;height:235px;top:155px;right:4px}.screen[data-device="portrait"] .seat-h{gap:3px;height:18px}.screen[data-device="portrait"] .seat-name{font-size:9px;max-width:60px}.screen[data-device="portrait"] .seat-score{font-size:8px}.screen[data-device="portrait"] .avatar{width:14px;height:14px;font-size:8px}.screen[data-device="portrait"] .seat-sub,.screen[data-device="portrait"] .meld{display:none}.screen[data-device="portrait"] .mini-grid{grid-template-columns:repeat(6,15px);grid-auto-rows:20px;gap:1px;margin-top:4px}.screen[data-device="portrait"] .mini-tile{font-size:7px}.screen[data-device="portrait"] .seat-river-footer{font-size:8px}.screen[data-device="portrait"] .river-expand{font-size:8px}.screen[data-device="portrait"] .center{width:76px;height:124px;border-radius:11px;gap:5px;padding:3px}.screen[data-device="portrait"] .center-logo{font-size:22px}.screen[data-device="portrait"] .center-status{font-size:10px;line-height:1.25}.screen[data-device="portrait"] .center-meta{font-size:8px}.screen[data-device="portrait"] .hand-dock{height:210px;padding:10px 8px;flex-direction:column;justify-content:space-around;gap:8px}.screen[data-device="portrait"] .hand-label{height:14px}.screen[data-device="portrait"] .hand-tiles{gap:2px}.screen[data-device="portrait"] .my-tile{width:24px;height:49px;font-size:11px}.screen[data-device="portrait"] .dock-actions{display:flex;gap:5px}.screen[data-device="portrait"] .action{min-height:38px;padding:5px 9px;font-size:10px}.screen[data-device="portrait"] .action.primary{grid-column:auto}.screen[data-device="portrait"] .demo-toast{bottom:214px}
+.screen[data-id="01"]{--bg:#063d32;--felt:#136047;--card:#134436;--accent:#f7d68a;--ink:#f9f6e9;--tile:#fff7e8;--tileInk:#28714f;--border:#cbbd8a66}
+.screen[data-id="02"]{--bg:#091428;--felt:#112942;--card:#111f39;--accent:#4fe4ce;--ink:#e4faff;--muted:#9ebfd1;--tileInk:#1866a3;--border:#51c9d366}.screen[data-id="02"] .game-table{background-image:linear-gradient(90deg,#31517925 1px,transparent 1px),linear-gradient(#31517925 1px,transparent 1px);background-size:20px 20px}.screen[data-id="02"] .center{border-radius:4px}.screen[data-id="02"] .seat{border-radius:4px}
+.screen[data-id="03"]{--bg:#e6f0f4;--felt:#d4e6ec;--card:#f9fefe;--accent:#1b6d9f;--ink:#254556;--muted:#5d7e8a;--tile:#ffffff;--tileInk:#145d91;--tileEdge:#c0d3d8;--border:#5b91af66}.screen[data-id="03"] .game-header{background:#f0f7fa}.screen[data-id="03"] .center{border-radius:99px}.screen[data-id="03"] .hand-dock{background:#e9f4f8}
+.screen[data-id="04"]{--bg:#f5f3eb;--felt:#eeece3;--card:#fffdfa;--accent:#3b8067;--ink:#314b42;--muted:#738e84;--tile:#fffdf5;--tileInk:#255a50;--tileEdge:#dad2c5;--border:#648b7966}.screen[data-id="04"] .seat{box-shadow:none}.screen[data-id="04"] .center{background:none;border-style:dashed}.screen[data-id="04"] .center-logo{display:none}
+.screen[data-id="05"]{--bg:#fff3e6;--felt:#e8cdb5;--card:#fffdf9;--accent:#b96750;--ink:#644b46;--muted:#947e77;--tile:#fff9ef;--tileInk:#316c6b;--border:#b58b7566}.screen[data-id="05"] .seat{border-radius:17px}.screen[data-id="05"] .avatar{border-radius:100%}.screen[data-id="05"] .center{border-radius:30px}
+.screen[data-id="06"]{--bg:#101c22;--felt:#182d34;--card:#16262d;--accent:#ffab61;--ink:#eef0e6;--muted:#9badad;--border:#feaa6877}.screen[data-id="06"] .game-top-data{font-family:ui-monospace,monospace}.screen[data-id="06"] .seat{border-radius:1px;border-left:3px solid var(--accent)}.screen[data-id="06"] .center{border-radius:0}.screen[data-id="06"] .action{border-radius:1px}
+.screen[data-id="07"]{--bg:#2f261d;--felt:#23543f;--card:#4a3726;--accent:#f1c787;--ink:#fff0d7;--muted:#d9c6a9;--border:#be925c99}.screen[data-id="07"] .game-table{box-shadow:inset 0 0 0 14px #674726;background-image:radial-gradient(ellipse,#27664d,#13422f)}.screen[data-id="07"] .seat{background:#234839}.screen[data-id="07"] .hand-dock{background:#403124}
+.screen[data-id="08"]{--bg:#d6ebd9;--felt:#b9dcc3;--card:#f3fcf0;--accent:#337e59;--ink:#284737;--muted:#638672;--tileInk:#236b45;--border:#75ab8866}.screen[data-id="08"] .seat{border-radius:21px}.screen[data-id="08"] .center{border-radius:24px;background:#e9f6e8}
+.screen[data-id="09"]{--bg:#301c37;--felt:#452750;--card:#4c3154;--accent:#ffabc8;--ink:#fff0f8;--muted:#dfbfd8;--border:#f9a6cb66}.screen[data-id="09"] .seat{border-radius:16px}.screen[data-id="09"] .center{border-radius:50px}.screen[data-id="09"] .my-tile{border-bottom-color:#ce88aa}
+.screen[data-id="10"]{--bg:#071f2a;--felt:#113848;--card:#102d3d;--accent:#8becff;--ink:#effcff;--muted:#a1cfdb;--border:#6bcfe688}.screen[data-id="10"] .game-header{background:#062736}.screen[data-id="10"] .seat{border-radius:6px}.screen[data-id="10"] .center{background:#0b2834;box-shadow:0 0 0 3px #66c7de20}
+.screen[data-id="02"] .seat.top,.screen[data-id="06"] .seat.top,.screen[data-id="10"] .seat.top{width:380px;left:calc(50% - 190px)}
+.screen[data-id="02"] .seat.bottom,.screen[data-id="06"] .seat.bottom,.screen[data-id="10"] .seat.bottom{width:380px;left:calc(50% - 190px)}
+.screen[data-id="02"][data-device="landscape"] .seat.top,.screen[data-id="06"][data-device="landscape"] .seat.top,.screen[data-id="10"][data-device="landscape"] .seat.top,.screen[data-id="02"][data-device="landscape"] .seat.bottom,.screen[data-id="06"][data-device="landscape"] .seat.bottom,.screen[data-id="10"][data-device="landscape"] .seat.bottom{width:256px;left:calc(50% - 128px)}
+.screen[data-id="02"][data-device="portrait"] .seat.top,.screen[data-id="06"][data-device="portrait"] .seat.top,.screen[data-id="10"][data-device="portrait"] .seat.top,.screen[data-id="02"][data-device="portrait"] .seat.bottom,.screen[data-id="06"][data-device="portrait"] .seat.bottom,.screen[data-id="10"][data-device="portrait"] .seat.bottom{width:203px;left:calc(50% - 101px)}
+.screen[data-id="05"] .avatar,.screen[data-id="08"] .avatar{width:25px;height:25px}.screen[data-id="05"][data-device="landscape"] .avatar,.screen[data-id="08"][data-device="landscape"] .avatar{width:14px;height:14px}.screen[data-id="05"][data-device="portrait"] .avatar,.screen[data-id="08"][data-device="portrait"] .avatar{width:14px;height:14px}
+.screen[data-id="04"] .seat.left,.screen[data-id="08"] .seat.left{left:4px}.screen[data-id="04"] .seat.right,.screen[data-id="08"] .seat.right{right:4px}
+.screen[data-id="09"] .hand-dock{border-top-width:5px}.screen[data-id="10"] .dock-actions{grid-template-columns:100px 100px}.screen[data-id="10"] .game-top-data span{border-radius:2px}
+/* Distinct structural explorations, not just ten color palettes. */
+.screen[data-id="02"][data-device="desktop"] .seat.left,.screen[data-id="02"][data-device="desktop"] .seat.right{width:220px;height:272px;top:92px}
+.screen[data-id="02"][data-device="desktop"] .center{width:380px;height:104px}
+.screen[data-id="03"][data-device="desktop"] .seat.left,.screen[data-id="03"][data-device="desktop"] .seat.right{width:282px;top:99px;height:259px}
+.screen[data-id="03"][data-device="desktop"] .center{width:206px;height:164px}
+.screen[data-id="04"][data-device="desktop"] .seat{border-color:#789d8a30;background:rgba(255,255,255,.65)}
+.screen[data-id="04"][data-device="desktop"] .seat.left,.screen[data-id="04"][data-device="desktop"] .seat.right{width:224px;height:240px}
+.screen[data-id="04"][data-device="desktop"] .center{width:355px;height:100px}
+.screen[data-id="05"][data-device="desktop"] .seat.left,.screen[data-id="05"][data-device="desktop"] .seat.right{width:275px;height:231px}
+.screen[data-id="05"][data-device="desktop"] .seat.top,.screen[data-id="05"][data-device="desktop"] .seat.bottom{width:304px;left:calc(50% - 152px)}
+.screen[data-id="05"][data-device="desktop"] .center{width:300px;height:153px}
+.screen[data-id="06"][data-device="desktop"] .seat.top,.screen[data-id="06"][data-device="desktop"] .seat.bottom{width:430px;left:calc(50% - 215px)}
+.screen[data-id="06"][data-device="desktop"] .seat.left,.screen[data-id="06"][data-device="desktop"] .seat.right{width:231px}
+.screen[data-id="06"][data-device="desktop"] .center{width:360px;height:105px}
+.screen[data-id="07"][data-device="desktop"] .seat.top,.screen[data-id="07"][data-device="desktop"] .seat.bottom{width:336px;left:calc(50% - 168px)}
+.screen[data-id="07"][data-device="desktop"] .center{width:210px;height:145px;border-radius:60px}
+.screen[data-id="08"][data-device="desktop"] .seat.top,.screen[data-id="08"][data-device="desktop"] .seat.bottom{width:344px;left:calc(50% - 172px)}
+.screen[data-id="08"][data-device="desktop"] .seat.left,.screen[data-id="08"][data-device="desktop"] .seat.right{width:240px}
+.screen[data-id="08"][data-device="desktop"] .center{width:278px;height:118px}
+.screen[data-id="09"][data-device="desktop"] .seat.top,.screen[data-id="09"][data-device="desktop"] .seat.bottom{width:367px;left:calc(50% - 183px)}
+.screen[data-id="09"][data-device="desktop"] .seat.left,.screen[data-id="09"][data-device="desktop"] .seat.right{width:204px;height:266px;top:95px}
+.screen[data-id="09"][data-device="desktop"] .center{width:375px;height:115px}
+.screen[data-id="10"][data-device="desktop"] .seat.top,.screen[data-id="10"][data-device="desktop"] .seat.bottom{width:410px;left:calc(50% - 205px)}
+.screen[data-id="10"][data-device="desktop"] .seat.left,.screen[data-id="10"][data-device="desktop"] .seat.right{width:228px;height:254px;top:102px}
+.screen[data-id="10"][data-device="desktop"] .center{width:366px;height:96px}
+.screen[data-id="10"][data-device="desktop"] .hand-dock{height:128px}
+.screen[data-id="02"][data-device="landscape"] .seat.left,.screen[data-id="02"][data-device="landscape"] .seat.right,
+.screen[data-id="09"][data-device="landscape"] .seat.left,.screen[data-id="09"][data-device="landscape"] .seat.right{width:173px}
+.screen[data-id="03"][data-device="landscape"] .center,.screen[data-id="08"][data-device="landscape"] .center{width:176px;height:84px}
+.screen[data-id="04"][data-device="landscape"] .center{background:transparent;border-style:dashed}
+.screen[data-id="07"][data-device="landscape"] .game-table{box-shadow:inset 0 0 0 6px #674726}
+.screen[data-id="10"][data-device="landscape"] .seat.left,.screen[data-id="10"][data-device="landscape"] .seat.right{width:175px}
+
+@media(max-width:1100px){.concepts{grid-template-columns:repeat(5,minmax(0,1fr))}}@media(max-width:750px){.concepts{grid-template-columns:repeat(2,minmax(0,1fr))}.shell{padding:14px 11px 40px}.prototype-shell{padding:5px}.concept{padding:7px}.thumb{height:83px}}@media(prefers-reduced-motion:reduce){.my-tile{transition:none}}
+</style>
+</head>
+<body>
+<main class="shell">
+ <div class="shell-head"><div class="logo">▣ MAHJONG FRIENDS <span style="color:#6e9f88">/ DESIGN LAB</span></div><span class="shell-pill">10 concepts · static simulation · NOT live multiplayer</span></div>
+ <h1>为真正好玩的四人麻将，重新设计牌桌。</h1>
+ <p class="intro">以现有 Mahjong Friends 的四席、真实牌河、碰杠明牌、Bot、选牌确认和 Practice v1 积分为基础。重点解决「牌河与明牌区域多重滚动、手机横屏溢出、操作层抢空间、文字过小」；切换 10 个视觉方向，并查看桌面 / 手机横屏 / 手机竖屏。</p>
+ <div class="device-row" role="group" aria-label="预览尺寸"><button type="button" data-device="desktop" aria-pressed="true">桌面 1100×620</button><button type="button" data-device="landscape" aria-pressed="false">手机横屏 844×390</button><button type="button" data-device="portrait" aria-pressed="false">手机竖屏 390×844</button><span class="shell-pill">无嵌套滚动 · 牌河分页查看</span></div>
+ <div class="proto-info"><div><div class="proto-title" id="conceptTitle"></div><p class="proto-sub" id="conceptDescription"></p></div><button class="small-action" id="resetPreview" type="button">重置模拟桌面</button></div>
+ <div class="prototype-shell"><div class="stage" id="stage"><div class="screen" id="screen" data-device="desktop" data-id="01" aria-label="交互式牌桌视觉原型"></div></div></div>
+ <div class="tipbar"><span><strong>交互：</strong>选一张手牌 → 点击「确认打出」；点击任一家「查看全部」→ 分页看完整牌河，按 Esc 关闭。</span><span>此页面仅为设计演示，不连接真实牌局。</span></div>
+ <section aria-label="十款原型"><div class="concepts" id="concepts"></div></section>
+ <p class="footer-note">设计原则：无游戏主屏嵌套滚动；四家永不因内容增长而挤占对方区域；上下座位最近 12 张、左右座位最近 18 张弃牌常驻；剩余通过无滚动分页查看；明牌与花牌保持可见摘要；主手牌和确认按钮固定；较少信息放在二级详情里。注意：这些是可切换的交互视觉概念，尚非真实 Mahjong 游戏引擎或最终可用性验证。</p>
+</main>
+<script>
+(function(){
+"use strict";
+var schemes=[
+ {id:"01",title:"翡翠牌馆 · Emerald Heritage",tag:"传统桌面",desc:"延续现有深绿金色，减少厚重面板；四家对称，操作区独立停靠。最平衡的基础方向。",problem:"牌桌结构优先"},
+ {id:"02",title:"午夜街机 · Arcade Neon",tag:"轻电竞",desc:"蓝绿霓虹、高对比行动提示；顶部与底部加宽牌河，适合快速识别回合与打出牌。",problem:"强调当前玩家"},
+ {id:"03",title:"青花雅集 · Porcelain Blue",tag:"明亮清晰",desc:"青瓷白底与蓝色视觉层次，减少深色面板造成的拥挤感，适合长时间玩牌。",problem:"降低阅读负担"},
+ {id:"04",title:"无扰桌面 · Minimal Focus",tag:"极简",desc:"去掉中央装饰、使用极轻分隔与极少状态数字；最适合怕花眼、重视手牌的人。",problem:"消除视觉噪声"},
+ {id:"05",title:"好友客厅 · Social Lounge",tag:"温暖社交",desc:"柔和奶油色、圆形头像与轻松的好友座位卡，让真人/机器人身份更加明显。",problem:"突出朋友一起玩"},
+ {id:"06",title:"战术信息台 · Tactical HUD",tag:"高密度",desc:"近黑底、矩形仪表化状态栏；显示牌墙、回合、积分但不会压缩手牌区。",problem:"熟练玩家效率"},
+ {id:"07",title:"木纹牌桌 · Classic Teak",tag:"实体质感",desc:"深木边框、毛毡桌面和纸牌材质感，复刻现实打麻将的气氛。",problem:"真实麻将氛围"},
+ {id:"08",title:"花园茶室 · Botanical Calm",tag:"轻快治愈",desc:"浅绿色与大圆角，柔和呈现动物和花牌；适合家庭及轻度玩家。",problem:"舒适与包容性"},
+ {id:"09",title:"粉紫同乐 · Social Pop",tag:"明快活泼",desc:"粉紫珊瑚色、聚焦轮到谁与好友状态；可以延伸成个性化桌布/皮肤。",problem:"社交个性化"},
+ {id:"10",title:"竞技紧凑 · Compact Pro",tag:"推荐优先验证",desc:"最大化牌面与可点击区域，信息密度高但层级克制；优先为 844×390 横屏做尺寸约束与响应式布局。",problem:"移动端实战效率"}
+];
+var labels=["一萬","二萬","三萬","四萬","五萬","六萬","七萬","八萬","九萬","一筒","二筒","三筒","四筒","五筒","六筒","七筒","八筒","九筒","一索","二索","三索","四索","五索","六索","東","南","西","北","發","白","飛"];
+var hand=["一萬","二萬","三萬","二筒","三筒","四筒","五筒","七筒","八筒","九筒","東","東","發","飛"];
+var players=[
+ {name:"🤖 北位 Bot",wind:"北",score:12,pos:"top",bot:true},
+ {name:"🤖 西位 Bot",wind:"西",score:-8,pos:"left",bot:true},
+ {name:"🤖 東位 Bot",wind:"東",score:-6,pos:"right",bot:true},
+ {name:"你 · 南",wind:"南",score:2,pos:"bottom",bot:false}
+];
+var selected=12,active=3,device="desktop",current=0,openRiver=-1,page=0,toast="";
+var stage=document.getElementById("stage"),screen=document.getElementById("screen");
+var cbox=document.getElementById("concepts");
+function escapeText(s){return String(s).replace(/[&<>"]/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function tileClass(s){return s==="飛"?"special":/[發]/.test(s)?"red":""}
+function tileIndex(seat,i){return labels[(i*7+seat*9+(i%5)*2)%labels.length]}
+function miniTile(seat,i){var name=tileIndex(seat,i);return '<span class="mini-tile '+tileClass(name)+'" title="'+escapeText(name)+'">'+escapeText(name)+'</span>'}
+function seatMarkup(p,idx){
+ var visible=(p.pos==="top"||p.pos==="bottom")?12:18,grid="";for(var i=24-visible;i<24;i++)grid+=miniTile(idx,i);
+ return '<section class="seat '+p.pos+(idx===active?' active':'')+'" aria-label="'+escapeText(p.name)+' 弃牌及明牌摘要"><div class="seat-h"><span class="avatar">'+(p.bot?'◆':'你')+'</span><span class="seat-name">'+escapeText(p.name)+'</span>'+(idx===3?'<span class="dealer">庄</span>':'')+'<span class="seat-score">'+(p.score>0?'+':'')+p.score+' 分</span></div><div class="seat-sub">东南西北 · '+p.wind+'位 · '+(idx===active?'正在出牌':'等待')+'</div><div class="mini-grid">'+grid+'</div><div class="seat-river-footer"><span>弃牌 24</span><button class="river-expand" type="button" data-river="'+idx+'">查看全部 +'+(24-visible)+'</button></div><div class="meld">明牌：碰 三筒 · 花 春 · 飞 ①</div></section>'
+}
+function handMarkup(){return hand.map(function(t,i){return '<button type="button" data-tile="'+i+'" class="my-tile '+tileClass(t)+(i===selected?' sel':'')+'" aria-pressed="'+(i===selected)+'" aria-label="选择 '+escapeText(t)+'">'+escapeText(t)+'</button>'}).join("")}
+function overlayMarkup(){
+ if(openRiver<0)return "";
+ var grid="";for(var i=page*12;i<page*12+12&&i<24;i++)grid+=miniTile(openRiver,i);
+ return '<div class="detail-overlay"><section class="detail-card" role="dialog" aria-modal="true" aria-label="'+escapeText(players[openRiver].name)+'完整牌河"><h3>'+escapeText(players[openRiver].name)+' · 完整牌河</h3><p>弃牌按真实时间顺序排列，分两页呈现，不使用内嵌滚动。</p><div class="mini-grid">'+grid+'</div><div class="detail-tools"><button type="button" data-page="-1" '+(page===0?'disabled':'')+'>上一页</button><span>'+(page+1)+' / 2</span><button type="button" data-page="1" '+(page===1?'disabled':'')+'>下一页</button><button type="button" class="close" data-close="true">关闭</button></div></section></div>'
+}
+function fitSeatContents(){
+  // Content budgeting, not concealment: always keep newest physical discards,
+  // shorten excerpts when a compact seat cannot hold the expected row count.
+  screen.querySelectorAll(".seat").forEach(function(seat){
+    var grid=seat.querySelector(".mini-grid");
+    var extra=seat.querySelector(".river-expand");
+    if(!grid||!extra)return;
+    var initial=grid.children.length,guard=0;
+    while(seat.scrollHeight>seat.clientHeight+1&&grid.children.length>6&&guard<18){
+      grid.removeChild(grid.firstElementChild);
+      guard++;
+    }
+    if(guard>0)extra.textContent="查看全部 +"+(24-grid.children.length);
+    // Last resort: remove purely redundant two-line seat description, while
+    // preserving nickname, score, river, explicit full history and meld label.
+    if(seat.scrollHeight>seat.clientHeight+1)seat.classList.add("compact-content");
+  });
+}
+function render(){
+ var scheme=schemes[current];screen.dataset.id=scheme.id;screen.dataset.device=device;
+ document.getElementById("conceptTitle").textContent=(current+1)+"/10 · "+scheme.title;
+ document.getElementById("conceptDescription").textContent=scheme.desc+" · "+scheme.problem;
+ var seatHtml=players.map(seatMarkup).join("");
+ screen.innerHTML='<header class="game-header"><div class="game-brand">麻將友 · MAHJONG FRIENDS<small>PRIVATE ROOM  ·  6K2M9P  ·  PRACTICE V1</small></div><div class="game-top-data"><span>第 <b>02</b> 局</span><span>牌墙 <b>58</b></span><span>补牌 <b>11</b></span><span>实时 <b>●</b></span></div></header><div class="game-table">'+seatHtml+'<div class="center"><span class="center-logo">友</span><span class="center-status">轮到你出牌</span><span class="center-meta">请选择一张牌，再确认 · 最近弃牌：三筒</span></div></div><section class="hand-dock" aria-label="自己的手牌和操作按钮"><div class="hand-area"><div class="hand-label">我的手牌 · 南位 · '+(selected>=0?'已选 '+hand[selected]:'请选牌')+'</div><div class="hand-tiles">'+handMarkup()+'</div></div><div class="dock-actions"><button class="action primary" type="button" data-confirm="1">确认打出</button><button class="action" type="button" data-action="过">过</button><button class="action" type="button" data-action="碰">碰</button></div></section>'+(toast?'<div class="demo-toast" role="status">'+escapeText(toast)+'</div>':'')+overlayMarkup();
+ if(openRiver>=0){
+   // Bind the modal controls directly. The screen-level delegate is for game
+   // tiles, not for a paging event which replaces the modal DOM in-place.
+   screen.querySelectorAll(".detail-tools [data-page]").forEach(function(button){
+     button.addEventListener("click",function(event){
+       event.stopPropagation();
+       var direction=Number(button.dataset.page);
+       page=Math.max(0,Math.min(1,page+direction));
+       // Update only this dialog. Replacing the whole game scene during the
+       // pointer click can dismiss the overlay or lose keyboard focus.
+       var visible="";
+       for(var i=page*12;i<page*12+12&&i<24;i++)visible+=miniTile(openRiver,i);
+       var modal=screen.querySelector(".detail-card");
+       if(!modal)return;
+       modal.querySelector(".mini-grid").innerHTML=visible;
+       modal.querySelector(".detail-tools span").textContent=(page+1)+" / 2";
+       modal.querySelector('[data-page="-1"]').disabled=(page===0);
+       modal.querySelector('[data-page="1"]').disabled=(page===1);
+     });
+   });
+   var closeButton=screen.querySelector(".detail-tools [data-close]");
+   if(closeButton)closeButton.addEventListener("click",function(event){
+     event.stopPropagation();
+     openRiver=-1;render();
+   });
+ }
+ fitSeatContents();
+ cbox.querySelectorAll(".concept").forEach(function(c,i){c.setAttribute("aria-pressed",i===current?"true":"false")});
+ scale();
+}
+function scale(){
+ var w=device==="desktop"?1100:device==="landscape"?844:390,h=device==="desktop"?620:device==="landscape"?390:844;
+ var available=Math.max(230,stage.clientWidth-4);
+ var sc=Math.min(1,available/w);
+ stage.style.height=Math.ceil(h*sc)+"px";
+ screen.style.width=w+"px";screen.style.height=h+"px";
+ screen.style.left=Math.max(0,Math.floor((stage.clientWidth-w*sc)/2))+"px";
+ screen.style.transformOrigin="top left";
+ screen.style.transform="scale("+sc+")";
+}
+function buildCards(){
+ cbox.innerHTML=schemes.map(function(x,i){
+ return '<button class="concept" type="button" data-concept="'+i+'" aria-pressed="'+(i===current)+'"><div class="thumb" style="--bg:'+({"01":"#063d32","02":"#091428","03":"#e6f0f4","04":"#f5f3eb","05":"#fff3e6","06":"#101c22","07":"#2f261d","08":"#d6ebd9","09":"#301c37","10":"#071f2a"})[x.id]+';--felt:'+({"01":"#136047","02":"#112942","03":"#d4e6ec","04":"#eeece3","05":"#e8cdb5","06":"#182d34","07":"#23543f","08":"#b9dcc3","09":"#452750","10":"#113848"})[x.id]+';--card:'+({"01":"#134436","02":"#111f39","03":"#f9fefe","04":"#fffdfa","05":"#fffdf9","06":"#16262d","07":"#4a3726","08":"#f3fcf0","09":"#4c3154","10":"#102d3d"})[x.id]+';--accent:'+({"01":"#f7d68a","02":"#4fe4ce","03":"#1b6d9f","04":"#3b8067","05":"#b96750","06":"#ffab61","07":"#f1c787","08":"#337e59","09":"#ffabc8","10":"#8becff"})[x.id]+';--border:#ffffff55"><div class="tt ta"></div><div class="tt tl"></div><div class="tt tr"></div><div class="tt tb"></div><div class="tc"></div><div class="td"></div></div><span class="concept-id">DIRECTION '+x.id+' · '+x.tag+'</span><strong>'+x.title.split(" · ")[0]+'</strong><small>'+x.problem+'</small></button>'
+ }).join("");
+}
+cbox.addEventListener("click",function(e){var btn=e.target.closest("[data-concept]");if(!btn)return;current=Number(btn.dataset.concept);openRiver=-1;toast="";render();});
+document.querySelectorAll("[data-device]").forEach(function(btn){btn.addEventListener("click",function(){device=btn.dataset.device;document.querySelectorAll(".device-row [data-device]").forEach(function(b){b.setAttribute("aria-pressed",b===btn?"true":"false")});openRiver=-1;render()})});
+document.getElementById("resetPreview").addEventListener("click",function(){selected=12;openRiver=-1;page=0;toast="";active=3;render()});
+screen.addEventListener("click",function(e){
+ var el=e.target.closest("button");if(!el)return;
+ if(el.dataset.tile!==undefined){selected=Number(el.dataset.tile);toast="";render();return;}
+ if(el.dataset.river!==undefined){openRiver=Number(el.dataset.river);page=0;toast="";render();return;}
+ if(el.dataset.close!==undefined||el.dataset.page!==undefined)return; // handled by dialog controls
+ if(el.dataset.confirm){toast=selected>=0?"演示：已选择 "+hand[selected]+"（未连接服务器，未真正打牌）":"请选择一张手牌";render();return;}
+ if(el.dataset.action){toast="演示："+el.dataset.action+"（此处仅检视按钮，不执行真实操作）";render();}
+});
+document.addEventListener("keydown",function(e){
+ if(e.key==="Escape"&&openRiver>=0){openRiver=-1;render();return}
+ if(openRiver>=0)return;
+ if(e.key==="ArrowRight"||e.key==="ArrowLeft"){var within=screen.contains(document.activeElement);if(!within)return;e.preventDefault();selected=(selected+(e.key==="ArrowRight"?1:hand.length-1))%hand.length;render();screen.querySelector('[data-tile="'+selected+'"]').focus()}
+});
+buildCards();render();
+if("ResizeObserver" in window)new ResizeObserver(scale).observe(stage);else window.addEventListener("resize",scale);
+})();
+</script>
+</body>
+</html>
