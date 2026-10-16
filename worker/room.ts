@@ -2,9 +2,10 @@ import { DurableObject } from "cloudflare:workers";
 import { applyGameAction, assertTileConservation, projectPlayerView } from "../src/game/engine";
 import type { RoomPublicView } from "../src/shared/room";
 import { parseClientMessage } from "./protocol";
+import { nextBotAction } from "./bots";
 import { consumeTicket, pruneTickets, type TicketStore } from "./socketTicket";
 import {
-  configureRoom, findMember, joinRoom, newRoom, publicRoom, readyRoom,
+  configureRoom, fillRoomWithBots, findMember, joinRoom, newRoom, publicRoom, readyRoom,
   removeRoomMember, RoomError, settleRoom, startRoom, type RoomRecord
 } from "./roomCore";
 
@@ -100,6 +101,28 @@ export class MahjongRoom extends DurableObject<Env> {
     const data=authenticatedSnapshot(room,playerId,Date.now(),this.online());
     try{ws.send(JSON.stringify(data));}catch{/* socket has disconnected */}
   }
+  private async scheduleBot(room:RoomRecord):Promise<void> {
+    // Scheduling is durable even if the Worker hibernates or a player disconnects.
+    if(nextBotAction(room,crypto.randomUUID)) {
+      await this.ctx.storage.setAlarm(Date.now()+550);
+    }
+  }
+  async alarm():Promise<void> {
+    await this.serial(async()=>{
+      let room=await this.ctx.storage.get<RoomRecord>("room");
+      if(!room)return;
+      const action=nextBotAction(room,crypto.randomUUID);
+      if(!action)return;
+      const next=applyGameAction(room.game!,action);
+      assertTileConservation(next);
+      room=next.phase==="ended"?settleRoom({...room,game:next}):
+        {...room,game:next};
+      room.revision++;
+      await this.ctx.storage.put("room",room);
+      this.broadcast(room);
+      await this.scheduleBot(room);
+    });
+  }
   private broadcast(room:RoomRecord):void {
     for(const ws of this.ctx.getWebSockets()) this.sendSnapshot(ws,room);
   }
@@ -154,6 +177,7 @@ export class MahjongRoom extends DurableObject<Env> {
       room={...room,members:room.members.map(m=>m.id===actor.id?{...m,lastSeenAt:now}:m)};
       if(path==="/internal/state" && request.method==="GET") {
         await this.ctx.storage.put("room",room);
+        await this.scheduleBot(room);
         return json(authenticatedSnapshot(room,actor.id,now,this.online()));
       }
       if(request.method!=="POST") throw new RoomError(405,"不支持此操作");
@@ -167,7 +191,10 @@ export class MahjongRoom extends DurableObject<Env> {
         await this.ctx.storage.put("socketTickets",existing);
         return json({ticket,expiresInSeconds:30},201);
       }
-      if(path==="/internal/ready") room=readyRoom(room,actor.id,body.ready as boolean);
+      if(path==="/internal/fill-bots") {
+        room=fillRoomWithBots(room,actor.id,now,crypto.randomUUID);
+      }
+      else if(path==="/internal/ready") room=readyRoom(room,actor.id,body.ready as boolean);
       else if(path==="/internal/rules") room=configureRoom(room,actor.id,body.rules as RoomRecord["rules"]);
       else if(path==="/internal/start") room=startRoom(room,actor.id);
       else if(path==="/internal/leave") room=removeRoomMember(room,actor.id,actor.id);
@@ -176,6 +203,7 @@ export class MahjongRoom extends DurableObject<Env> {
       room.revision++;
       await this.ctx.storage.put("room",room);
       this.broadcast(room);
+      await this.scheduleBot(room);
       return json(authenticatedSnapshot(room,actor.id,now,this.online()));
     } catch(error) {
       if(error instanceof RoomError) return json({error:error.message},error.status);
@@ -217,6 +245,7 @@ export class MahjongRoom extends DurableObject<Env> {
         settled.revision++;
         await this.ctx.storage.put("room",settled); // commit before broadcasting
         this.broadcast(settled);
+        await this.scheduleBot(settled);
       }catch(error) {
         const message=error instanceof Error ? error.message : "出牌请求失败";
         if(ws.readyState===WebSocket.OPEN) {
