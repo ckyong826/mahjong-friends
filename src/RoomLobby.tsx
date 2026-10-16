@@ -248,10 +248,10 @@ export default function RoomLobby({onPathChanged}:{onPathChanged?:(inRoom:boolea
           ) : (
             <div className="game-unavailable">
               <strong>房间已经开局</strong>
-              <p>服务器已建立牌局，但实时对战与麻将桌界面还在开发中（Issues #5–#6）。目前不能操作出牌。</p>
+              <p>目前尚未收到这局的完整游戏快照。请检查网络连接或重新进入房间；不会在未取得服务器状态时允许出牌。</p>
             </div>
           )}
-          <p className="preview-note" role="status">实时连接：{socketStatus==="connected"?"已连接 ✓":socketStatus==="connecting"?"正在连接…":"断线重连中（HTTP 备用同步）"} · 游戏画面将在 Issue #6 加入。</p>
+          <p className="preview-note" role="status">实时连接：{socketStatus==="connected"?"已连接 ✓":socketStatus==="connecting"?"正在连接…":"断线重连中（HTTP 备用同步）"} · 所有出牌操作以服务器确认为准。</p>
         </div>
       )}
       {error&&<p role="alert" className="room-error">{error}</p>}
