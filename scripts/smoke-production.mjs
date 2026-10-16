@@ -126,7 +126,7 @@ export async function smokeRoomProbe(raw,{fetchImpl=fetch,log=console.log,openSo
   }
   log("PASS: disposable private room created and read only by its authenticated owner");
   const minted=await sendJson(fetchImpl,base,"/api/rooms/"+code+"/socket-ticket",{},token);
-  await requireStatus(minted,200,"one-use WebSocket ticket");
+  await requireStatus(minted,201,"one-use WebSocket ticket");
   const ticket=(await minted.json()).ticket;
   if(!/^[a-f0-9]{64}$/.test(ticket??""))throw new Error("invalid ephemeral socket ticket");
   const wss=base.replace(/^https:/,"wss:")+"/api/rooms/"+code+"/ws?ticket="+ticket;
