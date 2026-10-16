@@ -12,6 +12,10 @@ This project is **not deployed automatically until the owner provides credential
 - Ensure the Cloudflare account supports SQLite-backed Durable Objects. First deployment must create the DO binding as configured in `wrangler.jsonc`.
 - The production script builds Vite and runs Wrangler deploy; no other database or long-lived VM is required.
 
+## After adding GitHub Actions secrets
+
+**Adding or editing GitHub Actions secrets does not rerun a previously completed deployment.** Trigger the deployment from `Actions → Deploy Cloudflare Worker → Run workflow → main` or merge a new commit into `main` to run CI followed by the deployment workflow. A prior green deploy run may have *skipped* all deployment steps if credentials were absent; inspect the **Deploy React frontend and Durable Object Worker** step itself, not just the workflow status.
+
 ## CI and deploy gate
 
 CI on each PR: TypeScript strict check, Vitest, Worker bundle build and Chromium Playwright test on four **separate browser contexts**. E2E covers anonymous invite, four seats, readiness, starting the hand, real UI discard and four personalized discard rivers, full round using WebSocket actions, settlement and next round. Chromium screenshots of desktop/mobile and traces are retained if tests fail.
