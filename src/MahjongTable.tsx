@@ -116,7 +116,9 @@ function Seat({position,player,view,active,latest,score,windByPlayer,dealer,arri
   const visibleRows=allRows.slice(-2);
   const earlierTiles=view.discards.length-visibleRows.reduce((total,line)=>total+line.length,0);
   const historyPageCount=Math.max(1,Math.ceil(view.discards.length/18));
-  const publicPageCount=Math.max(1,Math.ceil(view.melds.length/2),Math.ceil(view.bonuses.length/4));
+  // One entire physical meld + up to three flowers per page fits even a short
+  // landscape modal. Never crop a single claimed Chi/Pong/Kong or a flower.
+  const publicPageCount=Math.max(1,view.melds.length,Math.ceil(view.bonuses.length/3));
   const currentPageCount=openPanel==="river"?historyPageCount:publicPageCount;
   const page=Math.min(historyPage,currentPageCount-1);
   const showPanel=(kind:"river"|"public",trigger:HTMLButtonElement)=>{
@@ -172,12 +174,20 @@ function Seat({position,player,view,active,latest,score,windByPlayer,dealer,arri
           })}
       </div>
     </div>
-    <div className="mj-public-tray">
-      <DisplayMelds player={{...view,bonuses:view.bonuses.slice(0,2),melds:view.melds.slice(0,1)}}
-        windByPlayer={windByPlayer}/>
+    <div className="mj-public-tray" aria-label={player.nickname+" 的公开明牌与花牌概览"}>
+      {/* A side player's physical meld + flowers can be wider than their entire
+          grid cell. Do not render half a Chi or clip a flower. Keep all counts
+          visible on the board, and expose every real tile in the modal. */}
       <button type="button" className="mj-public-open" onClick={event=>showPanel("public",event.currentTarget)}
-        aria-label={"查看 "+player.nickname+" 全部公开组合与花牌"}>
-        明{view.melds.length} 花{view.bonuses.length} ↗
+        aria-label={"查看 "+player.nickname+" 全部公开组合与花牌："+
+          view.melds.length+"组明牌，"+view.bonuses.length+"张花牌或动物牌"}>
+        <span className="mj-public-summary-meld" aria-hidden="true">
+          {view.melds.length===0?"明 0":
+            (view.melds.at(-1)?.kind==="chi"?"吃":
+              view.melds.at(-1)?.kind==="pong"?"碰":"杠")+" "+view.melds.length}
+        </span>
+        <span className="mj-public-summary-bonus" aria-hidden="true">花 {view.bonuses.length}</span>
+        <span className="mj-public-arrow" aria-hidden="true">↗</span>
       </button>
     </div>
     {openPanel&&<div className="mj-history-backdrop" aria-hidden="true"
@@ -214,8 +224,9 @@ function Seat({position,player,view,active,latest,score,windByPlayer,dealer,arri
           {view.discards.length===0&&<span>暂无弃牌</span>}
         </div>:
         <div className="mj-history-public">
-          <DisplayMelds player={{...view,bonuses:view.bonuses.slice(page*4,page*4+4),
-            melds:view.melds.slice(page*2,page*2+2)}} windByPlayer={windByPlayer}/>
+          <DisplayMelds player={{...view,bonuses:view.bonuses.slice(page*3,page*3+3),
+            melds:view.melds.slice(page,page+1)}} windByPlayer={windByPlayer}/>
+          {view.bonuses.length===0&&view.melds.length===0&&<span>暂无公开明牌或花牌</span>}
         </div>}
       <div className="mj-history-pagination">
         <button type="button" disabled={page===0} onClick={()=>setHistoryPage(p=>p-1)}>上一页</button>
