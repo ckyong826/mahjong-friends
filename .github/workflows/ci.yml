@@ -21,6 +21,8 @@ jobs:
         run: npm run typecheck
       - name: Unit tests
         run: npm test
+      - name: Production smoke script unit tests (offline fixtures)
+        run: npm run test:smoke
       - name: Build Cloudflare bundle
         run: npm run build
       - name: Install Chromium for end-to-end tests
