@@ -49,6 +49,19 @@ test("active Mahjong table fits desktop and phone landscape in one viewport",asy
       expect(rect.left,tag+" "+rect.selector+" left").toBeGreaterThanOrEqual(-2);
       expect(rect.right,tag+" "+rect.selector+" right").toBeLessThanOrEqual(width+2);
     }
+    const board=geom.boxes.find(rect=>rect.selector===".mj-board")!;
+    const controls=geom.boxes.find(rect=>rect.selector===".mj-controls")!;
+    const center=geom.boxes.find(rect=>rect.selector===".mj-center")!;
+    const hand=geom.boxes.find(rect=>rect.selector===".mj-hand")!;
+    // A CSS grid can collapse the entire table to its 4px borders while
+    // technically staying "visible" and non-scrolling. Catch that regression.
+    expect(board.height,tag+" usable physical table height")
+      .toBeGreaterThan(height<550?height*.34:height*.35);
+    expect(center.height,tag+" readable center/turn indicator").toBeGreaterThan(40);
+    expect(board.bottom,tag+" board must come BEFORE bottom controls")
+      .toBeLessThanOrEqual(controls.top+3);
+    expect(hand.top,tag+" hand must stay in the BOTTOM quarter/third of scene")
+      .toBeGreaterThan(height*.60);
     for(const rect of geom.handButtons) {
       expect(rect.left,tag+" hand tile left").toBeGreaterThanOrEqual(-2);
       expect(rect.right,tag+" hand tile right").toBeLessThanOrEqual(width+2);
