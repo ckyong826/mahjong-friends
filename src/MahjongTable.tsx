@@ -69,12 +69,13 @@ function DisplayMelds({player}: {player:PublicPlayerView}) {
   </div>;
 }
 
-function Seat({position,player,view,active,latest}:{
+function Seat({position,player,view,active,latest,score}:{
   position:SeatPosition;
   player:PlayerPublicInfo;
   view:PublicPlayerView;
   active:boolean;
   latest:{fromPlayerId:string;tile:Tile}|null;
+  score:number;
 }) {
   const newest=latest?.fromPlayerId===player.id?latest.tile.id:null;
   return <section className={"mj-seat mj-seat-"+position+(active?" mj-seat-turn":"")}
@@ -82,6 +83,9 @@ function Seat({position,player,view,active,latest}:{
     <div className="mj-seat-header">
       <span className="mj-wind">{windText(player.seat)}</span>
       <strong>{player.nickname}</strong>
+      {player.isBot&&<span className="mj-bot-label" title="练习机器人">BOT</span>}
+      <span className="mj-seat-score">{score}分</span>
+      {position!=="bottom"&&<span className="mj-seat-count">{view.concealedCount}张</span>}
       {active&&<span className="mj-turn-pill">行动中</span>}
     </div>
     {position!=="bottom"&&<TileBack count={view.concealedCount} side={position}/>}
@@ -139,7 +143,7 @@ export default function MahjongTable({
     if(!user)return null;
     return <Seat position={position} player={user} view={seat.game}
       active={game.phase!=="ended"&&game.currentPlayerId===seat.id}
-      latest={game.lastDiscard}/>;
+      latest={game.lastDiscard} score={room.scores?.[user.id]??0}/>;
   };
 
   return <div className="mj-game" aria-label="四人实时麻将桌">
