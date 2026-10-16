@@ -14,6 +14,8 @@ export type SocketStatus="disconnected"|"connecting"|"connected";
 type Handlers={
   onSnapshot:(snapshot:RoomSnapshot)=>void;
   onError:(message:string)=>void;
+  onTurnNudge?:(event:{fromPlayerId:string;at:number})=>void;
+  onNudgeSent?:(event:{toPlayerId:string;at:number})=>void;
 };
 
 function isSnapshot(value:unknown):value is RoomSnapshot {
@@ -82,7 +84,15 @@ export function useRoomSocket(code:string|null,token:string,handlers:Handlers) {
           try {
             const body:unknown=JSON.parse(event.data);
             if(isSnapshot(body)) handlersRef.current.onSnapshot(body);
-            else if(body && typeof body==="object" && "type" in body &&
+            else if(body&&typeof body==="object"&&"type" in body&&
+              body.type==="turn_nudge"&&"fromPlayerId" in body&&
+              typeof body.fromPlayerId==="string"&&"at" in body&&typeof body.at==="number") {
+              handlersRef.current.onTurnNudge?.({fromPlayerId:body.fromPlayerId,at:body.at});
+            } else if(body&&typeof body==="object"&&"type" in body&&
+              body.type==="turn_nudge_sent"&&"toPlayerId" in body&&
+              typeof body.toPlayerId==="string"&&"at" in body&&typeof body.at==="number") {
+              handlersRef.current.onNudgeSent?.({toPlayerId:body.toPlayerId,at:body.at});
+            } else if(body && typeof body==="object" && "type" in body &&
               body.type==="error" && "message" in body && typeof body.message==="string") {
               handlersRef.current.onError(body.message);
             }
@@ -119,5 +129,10 @@ export function useRoomSocket(code:string|null,token:string,handlers:Handlers) {
     if(!ws||ws.readyState!==WebSocket.OPEN)throw new Error("尚未连接到牌局服务器");
     ws.send(JSON.stringify({type:"game_action",action}));
   };
-  return {status,sendAction};
+  const sendTurnNudge=():void=>{
+    const ws=socketRef.current;
+    if(!ws||ws.readyState!==WebSocket.OPEN)throw new Error("尚未连接到牌局服务器");
+    ws.send(JSON.stringify({type:"turn_nudge"}));
+  };
+  return {status,sendAction,sendTurnNudge};
 }
