@@ -1515,3 +1515,378 @@ html:has(.mj-game),body:has(.mj-game){height:100%;overflow:hidden}
   text-overflow:ellipsis;
   text-align:right;
 }
+
+
+/* Layout 03 · CLEAN MAHJONG TABLE (#59)
+ * Four independent chronological discard rivers around a clear, open felt.
+ * Opponents hug the edges; open melds/flowers remain physical tiles.
+ * The fixed discard dock and two-tap semantics from #57 are unchanged.
+ * This overrides, rather than changes, existing Layout 02's data semantics. */
+.mj-board.mj-central-discard-stage.mj-clean-table{
+  display:grid;
+  grid-template-columns:clamp(34px,6.5vw,75px) repeat(2,minmax(0,1fr))
+    minmax(0,1.13fr) repeat(2,minmax(0,1fr)) clamp(34px,6.5vw,75px);
+  grid-template-rows:clamp(20px,3.2vh,34px) clamp(19px,3.1vh,32px)
+    minmax(0,.95fr) minmax(45px,1.5fr) minmax(0,.95fr)
+    clamp(27px,4.9vh,48px);
+  gap:clamp(1px,.32vw,5px);
+  background:radial-gradient(ellipse at 50% 45%,#20745b 0%,#185a49 55%,#0c4439 100%);
+  border:3px solid #b38e51;
+  box-shadow:inset 0 0 0 2px #44836a, inset 0 0 70px #09291b4a,0 3px 6px #04150f59;
+  border-radius:18px;
+  padding:clamp(3px,.58vw,8px);
+  overflow:hidden;
+}
+.mj-clean-table::before{
+  content:none!important;
+  display:none!important;
+}
+.mj-clean-table .mj-seat{display:contents}
+.mj-clean-table .mj-seat-header,
+.mj-clean-table .mj-concealed,
+.mj-clean-table .mj-discard-panel,
+.mj-clean-table .mj-public-tray,
+.mj-clean-table .mj-center{
+  min-width:0;
+  min-height:0;
+  max-height:100%;
+  box-sizing:border-box;
+  z-index:1;
+}
+.mj-clean-table .mj-seat-header{
+  display:flex;
+  align-items:center;
+  align-self:stretch;
+  justify-content:center;
+  gap:4px;
+  padding:0 3px;
+  margin:0;
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  background:transparent;
+  border:0;
+  box-shadow:none;
+  outline:0;
+  flex-wrap:nowrap;
+  border-radius:6px;
+}
+.mj-clean-table .mj-seat-turn .mj-seat-header{
+  background:#0b362477;
+  outline:1px solid #f3cb77a8;
+  box-shadow:0 0 12px #ffe4a336;
+}
+.mj-clean-table .mj-seat-header strong{
+  font-size:clamp(9px,.84vw,12px);
+  font-weight:750;
+  text-shadow:0 1px 2px #031b18c9;
+  min-width:0;
+  flex:0 1 auto;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+.mj-clean-table .mj-seat-header .mj-seat-score{margin-left:0;font-size:9px;color:#f4d79a}
+.mj-clean-table .mj-seat-header .mj-wind{width:17px;height:17px;font-size:10px}
+.mj-clean-table .mj-seat-header .mj-avatar{width:20px;height:20px}
+.mj-clean-table .mj-seat-header .mj-turn-pill{margin:0;font-size:8px;padding:1px 3px}
+.mj-clean-table .mj-seat-header .mj-bot-label,
+.mj-clean-table .mj-seat-header .mj-seat-count{display:none}
+.mj-clean-table .mj-concealed{
+  display:flex;
+  align-items:center;
+  align-self:stretch;
+  justify-content:center;
+  gap:2px;
+  margin:0;
+  padding:1px;
+  overflow:hidden;
+  max-height:none;
+}
+.mj-clean-table .mj-concealed .mj-back{
+  flex:0 1 11px;
+  min-width:2px;
+  height:clamp(13px,2.4vh,20px);
+  border-radius:3px;
+  opacity:.88;
+}
+.mj-clean-table .mj-seat-top .mj-seat-header{grid-area:1 / 3 / 2 / 6}
+.mj-clean-table .mj-seat-top .mj-concealed{grid-area:2 / 2 / 3 / 6;flex-flow:row nowrap}
+.mj-clean-table .mj-seat-top .mj-public-tray{grid-area:1 / 6 / 3 / 8}
+.mj-clean-table .mj-seat-top .mj-discard-panel{grid-area:3 / 3 / 4 / 6}
+.mj-clean-table .mj-seat-left .mj-seat-header{grid-area:3 / 1}
+.mj-clean-table .mj-seat-left .mj-concealed{grid-area:4 / 1;flex-flow:column nowrap}
+.mj-clean-table .mj-seat-left .mj-discard-panel{grid-area:4 / 2 / 5 / 4}
+.mj-clean-table .mj-seat-left .mj-public-tray{grid-area:5 / 1 / 6 / 3}
+.mj-clean-table .mj-seat-right .mj-seat-header{grid-area:3 / 7}
+.mj-clean-table .mj-seat-right .mj-concealed{grid-area:4 / 7;flex-flow:column nowrap}
+.mj-clean-table .mj-seat-right .mj-discard-panel{grid-area:4 / 5 / 5 / 7}
+.mj-clean-table .mj-seat-right .mj-public-tray{grid-area:5 / 6 / 6 / 8}
+.mj-clean-table .mj-seat-bottom .mj-discard-panel{grid-area:5 / 3 / 6 / 6}
+.mj-clean-table .mj-seat-bottom .mj-seat-header{grid-area:6 / 1 / 7 / 3}
+.mj-clean-table .mj-seat-bottom .mj-public-tray{grid-area:6 / 3 / 7 / 8}
+.mj-clean-table .mj-seat-left .mj-concealed .mj-back,
+.mj-clean-table .mj-seat-right .mj-concealed .mj-back{
+  flex:0 1 auto;
+  width:clamp(12px,1.7vw,17px);
+  min-width:8px;
+  height:clamp(8px,1.75vh,15px);
+  border-width:1px;
+  border-bottom-width:2px;
+}
+.mj-clean-table .mj-seat-left .mj-seat-header,
+.mj-clean-table .mj-seat-right .mj-seat-header{
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:1px;
+  padding:1px;
+}
+.mj-clean-table .mj-seat-left .mj-seat-header .mj-avatar,
+.mj-clean-table .mj-seat-right .mj-seat-header .mj-avatar{width:18px;height:18px}
+.mj-clean-table .mj-seat-left .mj-seat-header .mj-wind,
+.mj-clean-table .mj-seat-right .mj-seat-header .mj-wind{display:none}
+.mj-clean-table .mj-seat-left .mj-seat-header strong,
+.mj-clean-table .mj-seat-right .mj-seat-header strong{max-width:100%;text-align:center;font-size:8px}
+.mj-clean-table .mj-seat-left .mj-seat-header .mj-seat-score,
+.mj-clean-table .mj-seat-right .mj-seat-header .mj-seat-score{font-size:8px}
+.mj-clean-table .mj-discard-panel{
+  display:flex;
+  flex-direction:column;
+  min-width:0;
+  min-height:0;
+  padding:1px 3px;
+  gap:2px;
+  background:transparent;
+  border:0;
+  border-radius:5px;
+  overflow:hidden;
+  box-shadow:none;
+}
+.mj-clean-table .mj-discard-title{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:4px;
+  flex:none;
+  margin:0;
+  padding:0;
+  color:#e9d6aa8f;
+  font-size:9px;
+  line-height:12px;
+  opacity:.85;
+}
+.mj-clean-table .mj-river-open{
+  background:transparent;
+  border:0;
+  color:#e8deb79e;
+  padding:0 2px;
+  font-size:9px;
+  line-height:12px;
+}
+.mj-clean-table .mj-river-open:hover{color:#fff3c9;background:#0c554249}
+.mj-clean-table .mj-river{
+  display:flex;
+  flex:1;
+  min-height:0;
+  min-width:0;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:2px;
+  overflow:hidden;
+}
+.mj-clean-table .mj-river-line{
+  display:flex;
+  justify-content:center;
+  gap:2px;
+  flex:none;
+  min-height:0;
+  padding:0;
+}
+.mj-clean-table .mj-discard-panel .mj-tile-mini{
+  width:clamp(11px,1.53vw,21px);
+  height:clamp(15px,2.25vw,29px);
+  box-shadow:0 2px 3px #082f2680;
+}
+.mj-clean-table .mj-seat-left .mj-river,
+.mj-clean-table .mj-seat-right .mj-river{
+  flex-direction:row;
+  align-items:center;
+  justify-content:center;
+  gap:3px;
+}
+.mj-clean-table .mj-seat-left .mj-river-line,
+.mj-clean-table .mj-seat-right .mj-river-line{
+  display:grid;
+  grid-template-rows:repeat(3,minmax(0,1fr));
+  grid-auto-columns:max-content;
+  grid-auto-flow:column;
+  align-content:center;
+  gap:1px;
+}
+.mj-clean-table .mj-seat-left .mj-discard-panel .mj-tile-mini,
+.mj-clean-table .mj-seat-right .mj-discard-panel .mj-tile-mini{
+  width:clamp(10px,1.22vw,17px);
+  height:clamp(13px,1.68vw,23px);
+}
+.mj-clean-table .mj-empty-river{
+  font-size:9px;
+  color:#f1e5c56b;
+  font-weight:400;
+  letter-spacing:.2px;
+}
+.mj-clean-table .mj-center{
+  grid-area:4 / 4 / 5 / 5;
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  align-items:center;
+  gap:2px;
+  text-align:center;
+  border:0;
+  border-radius:50%;
+  background:transparent;
+  box-shadow:none;
+  padding:0 1px;
+  overflow:hidden;
+}
+.mj-clean-table .mj-center-logo,.mj-clean-table .mj-center-winds{display:none}
+.mj-clean-table .mj-center-wall{
+  color:#ffe2a6;
+  font-size:clamp(12px,1.6vw,22px);
+  font-weight:900;
+  line-height:1.1;
+  text-shadow:0 2px 4px #093528;
+}
+.mj-clean-table .mj-center-state{font-size:clamp(9px,1.06vw,14px);line-height:1.25}
+.mj-clean-table .mj-center-detail{font-size:clamp(8px,.8vw,11px);line-height:1.2;color:#b7d1bd}
+.mj-clean-table .mj-center-claim{margin:2px 0 0;gap:3px;font-size:9px}
+.mj-clean-table .mj-center-claim .mj-tile-mini{width:16px;height:23px}
+.mj-clean-table .mj-public-tray{
+  border:0!important;
+  border-radius:4px;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:hidden;
+}
+.mj-clean-table .mj-public-empty{opacity:.45;font-size:9px}
+.mj-clean-table .mj-public-fit .mj-showcase-label{
+  border:0;
+  background:transparent;
+  color:#eed4a5;
+}
+.mj-clean-table .mj-public-fit .mj-meld{
+  border:0;
+  box-shadow:none;
+  background:#0a443a70;
+  border-radius:4px;
+}
+.mj-clean-table .mj-public-tray > .mj-public-open{
+  background:#0a403557;
+  border:0;
+  opacity:.66;
+}
+.mj-clean-table .mj-public-tray > .mj-public-open:hover{opacity:1}
+.mj-clean-table .mj-seat-header:has(.mj-turn-nudge){
+  background:#164738ad;
+  overflow:visible;
+}
+@media(min-height:600px){
+  .mj-clean-table .mj-seat-left .mj-river-line,
+  .mj-clean-table .mj-seat-right .mj-river-line{
+    grid-template-rows:repeat(6,minmax(0,1fr));
+  }
+}
+@media(max-height:540px) and (orientation:landscape){
+  .mj-board.mj-clean-table{
+    grid-template-rows:22px 19px minmax(0,.85fr) minmax(45px,1.65fr) minmax(0,.75fr) 26px;
+    gap:1px;
+    padding:2px 4px;
+    border-width:2px;
+  }
+  .mj-clean-table .mj-seat-header .mj-avatar{display:flex}
+  .mj-clean-table .mj-seat-top .mj-seat-header .mj-avatar{width:17px;height:17px}
+  .mj-clean-table .mj-seat-left .mj-seat-header .mj-avatar,
+  .mj-clean-table .mj-seat-right .mj-seat-header .mj-avatar{display:none}
+  .mj-clean-table .mj-seat-header .mj-turn-pill{display:none}
+  .mj-clean-table .mj-seat-header .mj-seat-score{font-size:8px}
+  .mj-clean-table .mj-discard-title{display:none}
+  .mj-clean-table .mj-discard-panel .mj-tile-mini{width:12px;height:16px}
+  .mj-clean-table .mj-seat-left .mj-discard-panel .mj-tile-mini,
+  .mj-clean-table .mj-seat-right .mj-discard-panel .mj-tile-mini{width:10px;height:13px}
+  .mj-clean-table .mj-seat-left .mj-river-line,
+  .mj-clean-table .mj-seat-right .mj-river-line{
+    grid-template-rows:repeat(3,minmax(0,1fr));
+  }
+  .mj-clean-table .mj-center-wall{font-size:12px}
+  .mj-clean-table .mj-center-state{font-size:9px}
+  .mj-clean-table .mj-center-detail{font-size:8px}
+  .mj-clean-table .mj-concealed .mj-back{height:14px}
+  .mj-clean-table .mj-seat-left .mj-concealed .mj-back,
+  .mj-clean-table .mj-seat-right .mj-concealed .mj-back{height:8px;width:12px}
+}
+@media(max-width:660px) and (orientation:portrait){
+  .mj-board.mj-clean-table{
+    grid-template-columns:30px repeat(2,minmax(0,1fr)) minmax(0,1.08fr)
+      repeat(2,minmax(0,1fr)) 30px;
+    grid-template-rows:27px 21px minmax(0,.9fr) minmax(60px,1.25fr)
+      minmax(0,.9fr) 32px;
+    padding:2px 3px;
+    gap:1px;
+  }
+  .mj-clean-table .mj-seat-top .mj-seat-header{grid-area:1 / 2 / 2 / 6}
+  .mj-clean-table .mj-seat-top .mj-public-tray{grid-area:1 / 6 / 3 / 8}
+  .mj-clean-table .mj-seat-left .mj-seat-header strong,
+  .mj-clean-table .mj-seat-right .mj-seat-header strong{display:none}
+  .mj-clean-table .mj-seat-left .mj-seat-header .mj-avatar,
+  .mj-clean-table .mj-seat-right .mj-seat-header .mj-avatar{display:flex}
+  .mj-clean-table .mj-discard-panel .mj-tile-mini{width:11px;height:16px}
+  .mj-clean-table .mj-seat-left .mj-discard-panel .mj-tile-mini,
+  .mj-clean-table .mj-seat-right .mj-discard-panel .mj-tile-mini{width:9px;height:13px}
+  .mj-clean-table .mj-seat-left .mj-river-line,
+  .mj-clean-table .mj-seat-right .mj-river-line{
+    grid-template-rows:repeat(6,minmax(0,1fr));
+  }
+  .mj-clean-table .mj-center-wall{font-size:12px}
+  .mj-clean-table .mj-center-state{font-size:9px}
+}
+
+/* Always leave an accessible full-river history affordance, including the
+ * 844×390 HUD where legacy Layout 02 had hidden the whole title control. */
+.mj-board.mj-clean-table .mj-discard-title{
+  position:absolute;
+  top:1px;
+  right:2px;
+  z-index:3;
+  display:flex;
+  align-items:center;
+  width:auto;
+  margin:0;
+  line-height:1;
+  pointer-events:auto;
+}
+.mj-board.mj-clean-table .mj-discard-title > span{display:none}
+.mj-board.mj-clean-table .mj-river-open{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:2px 4px;
+  min-width:19px;
+  min-height:16px;
+  font-size:8px;
+  line-height:1.05;
+  color:#fce8b6d9;
+  background:#0c433586;
+  border-radius:4px;
+  opacity:.85;
+}
+.mj-board.mj-clean-table .mj-river-open:focus-visible{
+  opacity:1;
+  outline:2px solid #f9d487;
+  outline-offset:1px;
+}
+@media(max-height:540px) and (orientation:landscape){
+  .mj-board.mj-clean-table .mj-discard-title{display:flex}
+  .mj-board.mj-clean-table .mj-river-open{font-size:8px;min-height:15px;padding:1px 2px}
+}

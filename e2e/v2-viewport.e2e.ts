@@ -128,13 +128,43 @@ test("active Mahjong table fits desktop and phone landscape in one viewport",asy
         trayTop:tray.top,textWidth:text.width};
     });
     expect(bottomHud.hudWidth,tag+" local HUD must have legible width")
-      .toBeGreaterThan(bottomHud.boardWidth*.25);
+      .toBeGreaterThan(Math.min(105,bottomHud.boardWidth*.095));
     expect(bottomHud.textWidth,tag+" player nickname must retain real width")
       .toBeGreaterThan(20);
     expect(bottomHud.hudRight<=bottomHud.trayLeft+2 ||
       bottomHud.hudBottom<=bottomHud.trayTop+2,
       tag+" local identity and public meld tray must not collide").toBe(true);
-    await page.screenshot({path:"test-results/v2-screenshots/"+tag+".png",fullPage:false});
+    const clean=await page.evaluate(()=>{
+      const board=document.querySelector(".mj-clean-table")!;
+      const box=(selector:string)=>{
+        const r=board.querySelector(selector)!.getBoundingClientRect();
+        return {left:r.left,right:r.right,top:r.top,bottom:r.bottom};
+      };
+      return {outer:board.getBoundingClientRect().toJSON(),
+        topBack:box(".mj-seat-top .mj-concealed"),
+        leftBack:box(".mj-seat-left .mj-concealed"),
+        rightBack:box(".mj-seat-right .mj-concealed"),
+        topRiver:box(".mj-seat-top .mj-discard-panel"),
+        leftRiver:box(".mj-seat-left .mj-discard-panel"),
+        rightRiver:box(".mj-seat-right .mj-discard-panel"),
+        bottomRiver:box(".mj-seat-bottom .mj-discard-panel"),
+        center:box(".mj-center"),
+        ownPublic:box(".mj-seat-bottom .mj-public-tray"),
+        boardScroll:board.scrollHeight>board.clientHeight+2||
+          board.scrollWidth>board.clientWidth+2};
+    });
+    expect(clean.boardScroll,tag+" clean board never internally scrolls").toBe(false);
+    expect(clean.topBack.bottom,tag+" top backs stay above top discard")
+      .toBeLessThanOrEqual(clean.topRiver.top+2);
+    expect(clean.leftBack.right,tag+" left backs stay outside left discard")
+      .toBeLessThanOrEqual(clean.leftRiver.left+2);
+    expect(clean.rightRiver.right,tag+" right river stays inside right backs")
+      .toBeLessThanOrEqual(clean.rightBack.left+2);
+    expect(clean.topRiver.bottom,tag+" top river ends before center")
+      .toBeLessThanOrEqual(clean.center.top+2);
+    expect(clean.bottomRiver.top,tag+" own river begins below center")
+      .toBeGreaterThanOrEqual(clean.center.bottom-2);
+    await page.screenshot({path:"test-results/v2-screenshots/layout03-"+tag+".png",fullPage:false});
   }
   // Keep the actual one-tile select & confirmation path after viewport reflow.
   await page.setViewportSize({width:844,height:390});
@@ -146,4 +176,5 @@ test("active Mahjong table fits desktop and phone landscape in one viewport",asy
   await expect(page.locator(".mj-hand button[aria-pressed='true']")).toHaveCount(1);
   await page.getByRole("button",{name:/打出所选牌/}).click();
   await expect.poll(async()=>page.locator(".mj-river .mj-tile").count()).toBeGreaterThan(0);
+  await page.screenshot({path:"test-results/v2-screenshots/layout03-live-844x390.png",fullPage:false});
 });
