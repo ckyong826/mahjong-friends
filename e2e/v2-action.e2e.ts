@@ -58,7 +58,7 @@ test("two taps discard, other tile reselects, keyboard stays safe, right dock do
   await expect(tiles.nth(1)).toHaveAttribute("aria-pressed","true");
   expect(await gameVersion()).toBe(before);
   await page.keyboard.press("Escape");
-  await expect(tiles.locator('[aria-pressed="true"]')).toHaveCount(0);
+  await expect(page.locator('.mj-hand button[aria-pressed="true"]')).toHaveCount(0);
   await expect(confirm).toBeDisabled();
 
   await tiles.first().click();
