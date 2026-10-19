@@ -1409,3 +1409,109 @@ html:has(.mj-game),body:has(.mj-game){height:100%;overflow:hidden}
 @media(prefers-reduced-motion:reduce){
   .mj-attention-overlay{background:#e4f2e9}
 }
+
+
+/* #57: One immutable hand row and right-side discard dock.
+ * Never mount/unmount the confirm button when selecting/waiting.
+ * The hand tiles flex-shrink within their own column rather than
+ * wrapping or pushing the dock, the bottom actions, or the board. */
+.mj-controls{position:relative}
+.mj-controls .mj-hand-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) 90px;
+  align-items:end;
+  gap:6px;
+  width:100%;
+  min-width:0;
+  min-height:0;
+  flex:none;
+}
+.mj-controls .mj-hand-row .mj-hand{
+  min-width:0;
+  width:100%;
+  max-width:100%;
+  box-sizing:border-box;
+  flex:none;
+  overflow:visible;
+}
+.mj-controls .mj-hand-row .mj-hand > button.mj-tile{
+  flex:0 1 auto;
+  box-sizing:border-box;
+  min-width:0;
+  max-width:100%;
+}
+.mj-controls .mj-hand-row > .mj-discard-fixed{
+  box-sizing:border-box;
+  display:grid;
+  place-items:center;
+  align-self:end;
+  justify-self:stretch;
+  width:90px;
+  min-width:0;
+  height:49px;
+  min-height:49px;
+  margin:0;
+  padding:3px 4px;
+  white-space:nowrap;
+  font-size:14px;
+  line-height:1;
+  font-weight:900;
+}
+.mj-controls .mj-secondary-actions{
+  flex:none;
+  min-height:34px;
+  align-items:center;
+  margin:0;
+  padding:0;
+}
+.mj-controls .mj-pending-note{
+  position:absolute;
+  bottom:100%;
+  right:8px;
+  padding:3px 9px;
+  margin:0 0 2px;
+  border:1px solid #dfbf8d;
+  border-radius:5px;
+  background:#163b32ed;
+  color:#ffe5af;
+  z-index:5;
+  pointer-events:none;
+}
+@media(max-height:540px) and (orientation:landscape){
+  .mj-controls .mj-hand-row{height:59px;grid-template-columns:minmax(0,1fr) 90px;gap:4px}
+  .mj-controls .mj-hand-row .mj-hand{height:59px}
+  .mj-controls .mj-hand-row > .mj-discard-fixed{
+    width:90px;height:47px;min-height:47px;font-size:12px;
+  }
+  .mj-controls .mj-secondary-actions{height:40px;min-height:40px}
+}
+@media(max-width:660px) and (orientation:portrait){
+  .mj-controls .mj-hand-row{grid-template-columns:minmax(0,1fr) 66px;gap:3px}
+  .mj-controls .mj-hand-row .mj-hand{padding-inline:1px;gap:1px}
+  .mj-controls .mj-hand-row > .mj-discard-fixed{
+    width:66px;height:38px;min-height:38px;
+    padding:3px 1px;font-size:12px;
+  }
+  .mj-controls .mj-secondary-actions{min-height:36px}
+}
+
+/* Selected-tile help can change length. Keep text from wrapping and changing
+ * the controls' physical height during first/second click. */
+.mj-controls .mj-controls-heading{
+  flex-wrap:nowrap;
+  min-width:0;
+  max-width:100%;
+}
+.mj-controls .mj-controls-heading > div{
+  flex:none;
+  min-width:0;
+  white-space:nowrap;
+}
+.mj-controls .mj-controls-heading .mj-controls-help{
+  flex:1 1 auto;
+  min-width:0;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  text-align:right;
+}

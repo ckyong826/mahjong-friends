@@ -44,6 +44,20 @@ describe("rendered Mahjong tabletop",()=>{
     expect(html).toContain('mj-tile-latest');
     expect(html).toContain("打出所选牌");
   });
+  it("keeps the right-side discard button mounted and disabled outside our turn",()=>{
+    const active=draw(game,"p0");
+    const waiting=draw({...game,currentPlayerId:"p1"},"p0");
+    for(const html of [active,waiting]){
+      expect(html).toContain('class="mj-hand-row"');
+      expect(html).toContain('class="mj-action mj-action-primary mj-discard-fixed"');
+      expect(html).toContain('aria-label="打出所选牌"');
+      expect(html).toContain("点击选牌，再点同一张打出");
+      expect((html.match(/class="mj-discard-fixed"/g)??[])).toHaveLength(0);
+      expect((html.match(/mj-discard-fixed/g)??[])).toHaveLength(1);
+      expect((html.match(/取消选牌/g)??[])).toHaveLength(1);
+    }
+    expect(waiting).toContain('aria-label="打出所选牌" disabled=""');
+  });
   it("prints white dragon but leaves Fei glyph blank and accessible",()=>{
     const html=draw();
     expect(html).toContain("mj-fei");
