@@ -67,6 +67,25 @@ test("active Mahjong table fits desktop and phone landscape in one viewport",asy
       expect(rect.right,tag+" hand tile right").toBeLessThanOrEqual(width+2);
       expect(rect.bottom,tag+" hand tile bottom").toBeLessThanOrEqual(height+2);
     }
+    const handDock=await page.evaluate(()=>{
+      const hand=document.querySelector(".mj-hand")!.getBoundingClientRect();
+      const dock=document.querySelector(".mj-discard-fixed")!.getBoundingClientRect();
+      const scene=document.querySelector(".mj-controls")!.getBoundingClientRect();
+      return {handRight:hand.right,handLeft:hand.left,handBottom:hand.bottom,
+        dockLeft:dock.left,dockRight:dock.right,dockBottom:dock.bottom,
+        sceneRight:scene.right,sceneBottom:scene.bottom,
+        dockHeight:dock.height,dockWidth:dock.width,
+        allButtons:[...document.querySelectorAll(".mj-discard-fixed")].length};
+    });
+    expect(handDock.allButtons,tag+" exactly one permanent right discard button").toBe(1);
+    expect(handDock.dockLeft,tag+" discard dock to the right of all hand tiles")
+      .toBeGreaterThanOrEqual(handDock.handRight-2);
+    expect(handDock.dockRight,tag+" discard dock in controls")
+      .toBeLessThanOrEqual(handDock.sceneRight+2);
+    expect(handDock.dockBottom,tag+" discard dock in viewport")
+      .toBeLessThanOrEqual(handDock.sceneBottom+2);
+    expect(handDock.dockWidth,tag+" discard button has width").toBeGreaterThan(40);
+    expect(handDock.dockHeight,tag+" discard button has touch height").toBeGreaterThan(30);
     const stage=await page.evaluate(()=>{
       const host=document.querySelector(".mj-board")!.getBoundingClientRect();
       const selectors=[
