@@ -593,16 +593,16 @@ export default function MahjongTable({
           </div>
         </div>}
         {game.phase==="claims"&&!claim&&<p className="mj-wait-note" role="status">{game.alreadyResponded?"已选择，正在等待其他人回应":"其他玩家正在考虑是否吃碰杠胡"}</p>}
-        {canDiscard&&<div className="mj-action-row mj-secondary-actions">
-          <ActionButton disabled={!enabled||!selected} onClick={()=>setSelectedId(null)}>取消选牌</ActionButton>
-          {game.canSelfWin&&<ActionButton kind="win" disabled={!enabled} onClick={()=>onAction({type:"win"})}>自摸胡牌</ActionButton>}
-          {ownKongs.map(ids=><ActionButton key={ids.join("-")} disabled={!enabled}
+        <div className="mj-action-row mj-secondary-actions" aria-label="其他可用操作">
+          <ActionButton disabled={!enabled||!canDiscard||!selected} onClick={()=>setSelectedId(null)}>取消选牌</ActionButton>
+          {canDiscard&&game.canSelfWin&&<ActionButton kind="win" disabled={!enabled} onClick={()=>onAction({type:"win"})}>自摸胡牌</ActionButton>}
+          {canDiscard&&ownKongs.map(ids=><ActionButton key={ids.join("-")} disabled={!enabled}
             onClick={()=>onAction({type:"kong",kind:"concealed",tileIds:ids})}>暗杠 {lookup(myHand,ids.slice(0,1))}</ActionButton>)}
-          {upgrades.map(option=><ActionButton key={option.meldIndex} disabled={!enabled}
+          {canDiscard&&upgrades.map(option=><ActionButton key={option.meldIndex} disabled={!enabled}
             onClick={()=>onAction({type:"kong",kind:"added",tileId:option.tileId,meldIndex:option.meldIndex})}>
             加杠 {lookup(myHand,[option.tileId])}</ActionButton>)}
-        </div>}
-        {pending&&<p className="mj-wait-note" role="status">指令已提交，正在等待服务器确认…</p>}
+        </div>
+        {pending&&<p className="mj-wait-note mj-pending-note" role="status">指令已提交，正在等待服务器确认…</p>}
       </>}
       <p className="mj-rule-note">牌面来自服务器实时状态；空白金框牌是「飞」，印有「白」的是白板。各家弃牌按出牌顺序排列，被吃碰杠的牌会移至对应玩家的明牌区。</p>
     </section>
