@@ -15,6 +15,7 @@ export type ClientGameAction = StripPlayer<GameAction>;
 export type ClientMessage =
   | { type: "sync" }
   | { type: "ping" }
+  | { type: "turn_nudge" }
   | { type: "game_action"; action: ClientGameAction };
 
 /** Only explicit action shapes can reach the reducer. User-supplied playerId
@@ -29,6 +30,7 @@ export function parseClientMessage(data: unknown): ClientMessage {
   if (!isObject(parsed)) throw new RoomError(400,"无效 WebSocket 消息");
   if (parsed.type === "ping") return {type:"ping"};
   if (parsed.type === "sync") return {type:"sync"};
+  if (parsed.type === "turn_nudge" && Object.keys(parsed).length===1) return {type:"turn_nudge"};
   if (parsed.type !== "game_action" || !isObject(parsed.action)) {
     throw new RoomError(400,"不支持此消息");
   }

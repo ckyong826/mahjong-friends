@@ -24,6 +24,10 @@ export interface RoomRecord {
   createdAt: number;
   revision: number;
   game: GameState | null;
+  /** Last accepted game transition; optional for previously persisted rooms. */
+  turnStartedAt?:number;
+  /** Room-global anti-spam throttle; reset only on new round. */
+  lastNudgeAt?:number;
 }
 export class RoomError extends Error {
   constructor(public readonly status: number, message: string) {
@@ -84,6 +88,7 @@ export function publicRoom(room:RoomRecord,now:number):RoomPublicView {
   return {
     code:room.code,ownerId:room.ownerId,rules:{...room.rules},state:room.state,
     roundNumber:room.roundNumber??0,scores:{...room.scores},lastSettlement:room.lastSettlement??null,
+    turnStartedAt:room.turnStartedAt,lastNudgeAt:room.lastNudgeAt,
     players:room.members.map(m=>({
       id:m.id,nickname:m.nickname,seat:m.seat,ready:m.ready,
       connected:m.isBot === true || now-m.lastSeenAt < 20_000,
@@ -154,6 +159,7 @@ export function startRoom(room:RoomRecord,actorId:string):RoomRecord {
   });
   const opened:RoomRecord={
     ...room,state:"playing",game,roundNumber:nextRound,lastSettlement:null,
+    turnStartedAt:Date.now(),lastNudgeAt:undefined,
     scores:{...room.scores}
   };
   return game.phase==="ended"?settleRoom(opened):opened;
@@ -179,4 +185,28 @@ export function fillRoomWithBots(room:RoomRecord,actorId:string,now:number,idFac
     scores[id]=0;
   }
   return {...room,members:members.sort((a,b)=>winds.indexOf(a.seat)-winds.indexOf(b.seat)),scores};
+}
+
+/** Server-only guard for the single, non-strobing "your turn" notification.
+ * No arbitrary target ID is ever supplied by the requesting browser. */
+export const NUDGE_WAIT_MS=30_000;
+export const NUDGE_COOLDOWN_MS=60_000;
+export function turnNudgeTarget(room:RoomRecord,actorId:string,now:number):string {
+  if(room.state!=="playing"||!room.game||room.game.phase!=="discard") {
+    throw new RoomError(409,"目前没有等待出牌的玩家");
+  }
+  const target=room.game.players[room.game.currentPlayerIndex]?.id;
+  if(!target||target===actorId)throw new RoomError(409,"不能提醒自己出牌");
+  if(!room.members.some(m=>m.id===actorId&&!m.isBot)) {
+    throw new RoomError(403,"只有房间真人玩家可提醒");
+  }
+  const targetMember=room.members.find(m=>m.id===target);
+  if(!targetMember||targetMember.isBot)throw new RoomError(409,"不能提醒练习机器人");
+  if(!room.turnStartedAt||now-room.turnStartedAt<NUDGE_WAIT_MS) {
+    throw new RoomError(429,"尚未等待超过30秒");
+  }
+  if(room.lastNudgeAt!==undefined&&now-room.lastNudgeAt<NUDGE_COOLDOWN_MS){
+    throw new RoomError(429,"已提醒过，请稍后再提醒");
+  }
+  return target;
 }

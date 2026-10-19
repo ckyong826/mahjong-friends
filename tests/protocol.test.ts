@@ -9,6 +9,8 @@ describe("realtime command security",()=>{
   it("supports snapshot sync and ping only as known control commands",()=>{
     expect(parseClientMessage('{"type":"sync"}')).toEqual({type:"sync"});
     expect(parseClientMessage('{"type":"ping"}')).toEqual({type:"ping"});
+    expect(parseClientMessage('{"type":"turn_nudge"}')).toEqual({type:"turn_nudge"});
+    expect(()=>parseClientMessage('{"type":"turn_nudge","targetId":"victim"}')).toThrow();
     expect(()=>parseClientMessage('{"type":"draw"}')).toThrow();
     expect(()=>parseClientMessage('not-json')).toThrow();
     expect(()=>parseClientMessage("x".repeat(2049))).toThrow();

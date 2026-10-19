@@ -44,15 +44,19 @@ export default function RoomLobby({onPathChanged}:{onPathChanged?:(inRoom:boolea
   const [busy,setBusy]=useState(false);
   const [error,setError]=useState("");
   const [notice,setNotice]=useState("");
+  const [attentionEvent,setAttentionEvent]=useState<{fromPlayerId:string;at:number}|null>(null);
+  const [nudgeNotice,setNudgeNotice]=useState("");
   const inFlightVersion=useRef<number|null>(null);
   const [submittedVersion,setSubmittedVersion]=useState<number|null>(null);
   const applySnapshot=useCallback((next:Snapshot)=>{
     setSnapshot(previous=>previous?.room.code===next.room.code &&
       (previous.revision??-1)>next.revision?previous:next);
   },[]);
-  const {status:socketStatus,sendAction}=useRoomSocket(code,code?savedToken(code):"",{
+  const {status:socketStatus,sendAction,sendTurnNudge}=useRoomSocket(code,code?savedToken(code):"",{
     onSnapshot:(next)=>{applySnapshot(next);setError("");},
-    onError:(message)=>{inFlightVersion.current=null;setSubmittedVersion(null);setError(message);}
+    onError:(message)=>{inFlightVersion.current=null;setSubmittedVersion(null);setError(message);},
+    onTurnNudge:event=>setAttentionEvent(event),
+    onNudgeSent:()=>setNudgeNotice("已提醒当前玩家出牌")
   });
   useEffect(()=>{
     // A newer server version confirms the prior action; reconnect permits retry
@@ -68,6 +72,16 @@ export default function RoomLobby({onPathChanged}:{onPathChanged?:(inRoom:boolea
       setSubmittedVersion(null);
     }
   },[socketStatus]);
+  useEffect(()=>{
+    if(!nudgeNotice)return;
+    const timeout=window.setTimeout(()=>setNudgeNotice(""),2500);
+    return ()=>window.clearTimeout(timeout);
+  },[nudgeNotice]);
+  const sendReminder=():void=>{
+    if(socketStatus!=="connected")return;
+    setNudgeNotice("");
+    try{sendTurnNudge();}catch(err){setError(err instanceof Error?err.message:"提醒失败");}
+  };
   const play=(draft:GameActionDraft):void=>{
     const game=snapshot?.game;
     if(!game||socketStatus!=="connected"||inFlightVersion.current!==null)return;
@@ -191,6 +205,8 @@ export default function RoomLobby({onPathChanged}:{onPathChanged?:(inRoom:boolea
         <MahjongTable room={room} game={snapshot.game} viewerId={snapshot.viewerId}
           connection={socketStatus} pending={submittedVersion!==null}
           onAction={play} onCopyInvite={()=>{void share();}}
+          onTurnNudge={sendReminder} attentionEvent={attentionEvent}
+          nudgeNotice={nudgeNotice}
           isOwner={isOwner} lobbyBusy={busy}
           onReady={()=>{void action("ready",{ready:!self?.ready});}}
           onNextRound={()=>{void action("start");}}/>

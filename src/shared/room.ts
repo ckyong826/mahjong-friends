@@ -50,6 +50,10 @@ export interface RoomPublicView {
   roundNumber?:number;
   scores?:Record<string,number>;
   lastSettlement?:RoundSettlement|null;
+  /** Server timestamp of last successful turn action, for wait reminders. */
+  turnStartedAt?:number;
+  /** Last room-wide reminder; clients can disable the reminder button. */
+  lastNudgeAt?:number;
 }
 
 /** Distinguish public room codes from private reconnect secrets. */

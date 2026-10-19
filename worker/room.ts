@@ -6,7 +6,7 @@ import { nextBotAction } from "./bots";
 import { consumeTicket, pruneTickets, type TicketStore } from "./socketTicket";
 import {
   configureRoom, fillRoomWithBots, findMember, joinRoom, newRoom, publicRoom, readyRoom,
-  removeRoomMember, RoomError, settleRoom, startRoom, type RoomRecord
+  removeRoomMember, RoomError, settleRoom, startRoom, turnNudgeTarget, type RoomRecord
 } from "./roomCore";
 
 export interface Env {
@@ -118,6 +118,7 @@ export class MahjongRoom extends DurableObject<Env> {
       room=next.phase==="ended"?settleRoom({...room,game:next}):
         {...room,game:next};
       room.revision++;
+      room.turnStartedAt=Date.now();
       await this.ctx.storage.put("room",room);
       this.broadcast(room);
       await this.scheduleBot(room);
@@ -229,6 +230,29 @@ export class MahjongRoom extends DurableObject<Env> {
         if(parsed.type==="sync") {
           this.sendSnapshot(ws,room);return;
         }
+        if(parsed.type==="turn_nudge"){
+          const now=Date.now();
+          // Persist a first timestamp when reconnecting to a room created
+          // before this optional clock existed (no guessed old duration).
+          if(!room.turnStartedAt){
+            room.turnStartedAt=now;
+            await this.ctx.storage.put("room",room);
+            this.broadcast(room);
+            throw new RoomError(429,"等待计时刚开始，请稍候");
+          }
+          const targetId=turnNudgeTarget(room,playerId,now);
+          const recipients=this.ctx.getWebSockets()
+            .filter(peer=>peer.readyState===WebSocket.OPEN&&this.socketPlayer(peer)===targetId);
+          if(!recipients.length)throw new RoomError(409,"对方目前离线，无法提醒");
+          room.lastNudgeAt=now;
+          room.revision++;
+          await this.ctx.storage.put("room",room);
+          const frame=JSON.stringify({type:"turn_nudge",fromPlayerId:playerId,at:now});
+          for(const peer of recipients)try{peer.send(frame);}catch{/* disconnected */}
+          ws.send(JSON.stringify({type:"turn_nudge_sent",toPlayerId:targetId,at:now}));
+          this.broadcast(room);
+          return;
+        }
         if(!room.game || room.state!=="playing")throw new RoomError(409,"房间尚未开始游戏");
         // Actor identity comes exclusively from the authenticated socket attachment.
         const action={...parsed.action,playerId};
@@ -243,6 +267,7 @@ export class MahjongRoom extends DurableObject<Env> {
         const settled=next.phase==="ended"?
           settleRoom({...room,game:next}):{...room,game:next};
         settled.revision++;
+        settled.turnStartedAt=Date.now();
         await this.ctx.storage.put("room",settled); // commit before broadcasting
         this.broadcast(settled);
         await this.scheduleBot(settled);
