@@ -478,7 +478,7 @@ export default function MahjongTable({
       </div>)}
       <small>练习计分，非正式家规</small>
     </div>
-    <div className="mj-board mj-central-discard-stage" aria-label="中央共享布局，四家独立弃牌区，每家各自显示打过的牌">
+    <div className="mj-board mj-central-discard-stage mj-clean-table" aria-label="简洁麻将桌，四家贴边暗牌及独立弃牌区">
       {byPosition("top")}
       {byPosition("left")}
       <div className="mj-center">
