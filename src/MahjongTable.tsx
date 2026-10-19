@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent as ReactKeyboardEvent, type MouseEvent as ReactMouseEvent, type ReactNode } from "react";
 import type { Tile } from "./shared/tiles";
 import TileFaceArt from "./game/TileFaceArt";
 import GameHelp from "./game/GameHelp";
@@ -38,7 +38,7 @@ export interface MahjongTableProps {
 
 function TileCard({tile,mini=false,selected=false,latest=false,arriving=false,onSelect,disabled=false,buttonRef}:{
   tile:Tile;mini?:boolean;selected?:boolean;latest?:boolean;arriving?:boolean;
-  onSelect?:()=>void;disabled?:boolean;buttonRef?:(node:HTMLButtonElement|null)=>void;
+  onSelect?:(event:ReactMouseEvent<HTMLButtonElement>)=>void;disabled?:boolean;buttonRef?:(node:HTMLButtonElement|null)=>void;
 }) {
   const style=tileAppearance(tile);
   const className=[
@@ -351,12 +351,32 @@ export default function MahjongTable({
   const canDiscard=game.phase==="discard"&&game.currentPlayerId===viewerId;
   const enabled=connection==="connected"&&!pending;
   const selected=selectedId?myHand.find(t=>t.id===selectedId):null;
+  const discardSelected=()=>{
+    if(!enabled||!canDiscard||!selected)return;
+    onAction({type:"discard",tileId:selected.id});
+    // In addition to the lobby's in-flight server guard, removing the
+    // selection immediately avoids an accidental repeat while awaiting ack.
+    setSelectedId(null);
+  };
+  const chooseTile=(tileId:string,event:ReactMouseEvent<HTMLButtonElement>)=>{
+    if(!enabled||!canDiscard)return;
+    if(selectedId===tileId){
+      // Keyboard activation fires click(detail=0). Keep keyboard's existing
+      // two-step confirmation to avoid accidental discard from repeated Enter.
+      if(event.detail>0){
+        onAction({type:"discard",tileId});
+        setSelectedId(null);
+      }
+      return;
+    }
+    setSelectedId(tileId);
+  };
   const seats=useMemo(()=>myPublic?
     seatPlayers(game,myPublic.seat,room.players):[],
     [myPublic,room.players,game]);
   const handleHandKeyboard=(event:ReactKeyboardEvent<HTMLDivElement>)=>{
-    // No automatic discard on keyboard navigation. Arrow/Home/End only select;
-    // pressing Enter on the separate confirm button is still required.
+    // Navigation and keyboard activation only select; the adjacent fixed
+    // discard button remains the explicit keyboard confirmation path.
     if(!enabled||!canDiscard||!myHand.length)return;
     if(event.key==="Escape") {
       if(selectedId){event.preventDefault();setSelectedId(null);}
@@ -482,22 +502,27 @@ export default function MahjongTable({
       <div className="mj-controls-heading">
         <div><strong>我的手牌</strong> <span>· {myPublic.nickname} · {windText(myPublic.seat)}位</span></div>
         <span className="mj-controls-help">{canDiscard?
-          selected?"已选 "+tileAppearance(selected).accessibleName+" · 请按确认打出":"选牌后点击确认打出；方向键可换牌":
+          selected?"已选 "+tileAppearance(selected).accessibleName+" · 再点同一张或按右侧打出":"点牌选中，再点同一张打出；方向键可换牌":
           game.phase==="claims"?"等待其他玩家回应，或选择抢牌":"等待轮到你"}</span>
       </div>
-      <div className="mj-hand" aria-label="你的暗牌；方向键选牌、Escape 取消，再点击确认打出"
-        onKeyDown={handleHandKeyboard}>
-        {myHand.map(tile=><TileCard key={tile.id} tile={tile}
-          selected={selected?.id===tile.id}
-          buttonRef={node=>{
-            if(node)handButtons.current.set(tile.id,node);
-            else handButtons.current.delete(tile.id);
-          }}
-          onSelect={()=>setSelectedId(old=>old===tile.id?null:tile.id)}
-          disabled={!enabled||!canDiscard}/>)}
+      <div className="mj-hand-row" aria-label="手牌与固定出牌按钮">
+        <div className="mj-hand" aria-label="你的暗牌；点击选牌，再点同一张打出；方向键换牌，Escape 取消"
+          onKeyDown={handleHandKeyboard}>
+          {myHand.map(tile=><TileCard key={tile.id} tile={tile}
+            selected={selected?.id===tile.id}
+            buttonRef={node=>{
+              if(node)handButtons.current.set(tile.id,node);
+              else handButtons.current.delete(tile.id);
+            }}
+            onSelect={event=>chooseTile(tile.id,event)}
+            disabled={!enabled||!canDiscard}/>)}
+        </div>
+        <button type="button" className="mj-action mj-action-primary mj-discard-fixed"
+          aria-label="打出所选牌" disabled={!enabled||!canDiscard||!selected}
+          onClick={discardSelected}>打出</button>
       </div>
       <span className="mj-screenreader-status" role="status" aria-live="polite" aria-atomic="true">
-        {canDiscard?(selected?"已选择 "+tileAppearance(selected).accessibleName+"，需点击确认打出":"轮到你出牌，请选择一张牌"):"等待行动"}
+        {canDiscard?(selected?"已选择 "+tileAppearance(selected).accessibleName+"，再点该牌或按右侧打出":"轮到你出牌，请选择一张牌"):"等待行动"}
       </span>
       {game.phase==="ended"?<div className="mj-results" role="dialog" aria-modal="true"
         aria-labelledby="mj-result-heading" tabIndex={-1} ref={resultsRef}
@@ -568,11 +593,8 @@ export default function MahjongTable({
           </div>
         </div>}
         {game.phase==="claims"&&!claim&&<p className="mj-wait-note" role="status">{game.alreadyResponded?"已选择，正在等待其他人回应":"其他玩家正在考虑是否吃碰杠胡"}</p>}
-        {canDiscard&&<div className="mj-action-row">
-          <ActionButton kind="primary" disabled={!enabled||!selected} onClick={()=>{
-            if(selected)onAction({type:"discard",tileId:selected.id});
-          }}>打出所选牌 {selected?"· "+tileAppearance(selected).accessibleName:""}</ActionButton>
-          {selected&&<ActionButton disabled={!enabled} onClick={()=>setSelectedId(null)}>取消选牌</ActionButton>}
+        {canDiscard&&<div className="mj-action-row mj-secondary-actions">
+          <ActionButton disabled={!enabled||!selected} onClick={()=>setSelectedId(null)}>取消选牌</ActionButton>
           {game.canSelfWin&&<ActionButton kind="win" disabled={!enabled} onClick={()=>onAction({type:"win"})}>自摸胡牌</ActionButton>}
           {ownKongs.map(ids=><ActionButton key={ids.join("-")} disabled={!enabled}
             onClick={()=>onAction({type:"kong",kind:"concealed",tileIds:ids})}>暗杠 {lookup(myHand,ids.slice(0,1))}</ActionButton>)}
