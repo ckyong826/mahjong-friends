@@ -176,4 +176,5 @@ test("active Mahjong table fits desktop and phone landscape in one viewport",asy
   await expect(page.locator(".mj-hand button[aria-pressed='true']")).toHaveCount(1);
   await page.getByRole("button",{name:/打出所选牌/}).click();
   await expect.poll(async()=>page.locator(".mj-river .mj-tile").count()).toBeGreaterThan(0);
+  await page.screenshot({path:"test-results/v2-screenshots/layout03-live-844x390.png",fullPage:false});
 });
