@@ -1494,3 +1494,24 @@ html:has(.mj-game),body:has(.mj-game){height:100%;overflow:hidden}
   }
   .mj-controls .mj-secondary-actions{min-height:36px}
 }
+
+/* Selected-tile help can change length. Keep text from wrapping and changing
+ * the controls' physical height during first/second click. */
+.mj-controls .mj-controls-heading{
+  flex-wrap:nowrap;
+  min-width:0;
+  max-width:100%;
+}
+.mj-controls .mj-controls-heading > div{
+  flex:none;
+  min-width:0;
+  white-space:nowrap;
+}
+.mj-controls .mj-controls-heading .mj-controls-help{
+  flex:1 1 auto;
+  min-width:0;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+  text-align:right;
+}
