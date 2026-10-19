@@ -1851,3 +1851,42 @@ html:has(.mj-game),body:has(.mj-game){height:100%;overflow:hidden}
   .mj-clean-table .mj-center-wall{font-size:12px}
   .mj-clean-table .mj-center-state{font-size:9px}
 }
+
+/* Always leave an accessible full-river history affordance, including the
+ * 844×390 HUD where legacy Layout 02 had hidden the whole title control. */
+.mj-board.mj-clean-table .mj-discard-title{
+  position:absolute;
+  top:1px;
+  right:2px;
+  z-index:3;
+  display:flex;
+  align-items:center;
+  width:auto;
+  margin:0;
+  line-height:1;
+  pointer-events:auto;
+}
+.mj-board.mj-clean-table .mj-discard-title > span{display:none}
+.mj-board.mj-clean-table .mj-river-open{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:2px 4px;
+  min-width:19px;
+  min-height:16px;
+  font-size:8px;
+  line-height:1.05;
+  color:#fce8b6d9;
+  background:#0c433586;
+  border-radius:4px;
+  opacity:.85;
+}
+.mj-board.mj-clean-table .mj-river-open:focus-visible{
+  opacity:1;
+  outline:2px solid #f9d487;
+  outline-offset:1px;
+}
+@media(max-height:540px) and (orientation:landscape){
+  .mj-board.mj-clean-table .mj-discard-title{display:flex}
+  .mj-board.mj-clean-table .mj-river-open{font-size:8px;min-height:15px;padding:1px 2px}
+}
